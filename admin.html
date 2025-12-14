@@ -27,6 +27,7 @@
             width:100%; padding:12px; margin:8px 0; border:1px solid rgba(255,255,255,0.3); border-radius:8px; 
             background: rgba(0,0,0,0.2); color: white; outline: none; 
         }
+        .login-input::placeholder { color: rgba(255,255,255,0.7); }
         
         aside { width:260px; background:var(--primary); color:white; display:flex; flex-direction:column; flex-shrink: 0; transition: 0.3s; }
         .brand { padding:20px; font-size:20px; font-weight:bold; border-bottom:1px solid #334155; display: flex; align-items: center; }
@@ -35,20 +36,24 @@
         
         main { flex:1; padding:30px; overflow-y:auto; position: relative; }
         .card { background:white; padding:20px; border-radius:12px; margin-bottom:20px; box-shadow:0 2px 5px rgba(0,0,0,0.05); }
+        
         .upload-form { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .form-group { display: flex; flex-direction: column; }
         .form-group label { font-size: 12px; color: #64748b; margin-bottom: 5px; font-weight: 500; }
         .form-input, select { padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; background: white; }
         .full-width { grid-column: span 2; }
+        
         .table-responsive { overflow-x: auto; border-radius: 8px; border: 1px solid #e2e8f0; }
         table { width:100%; border-collapse:collapse; white-space: nowrap; }
         th, td { padding:14px; text-align:left; border-bottom:1px solid #eee; }
+        
         .btn { padding:8px 16px; border:none; border-radius:6px; cursor:pointer; color:white; font-size:13px; font-weight: 500; transition: 0.2s; }
         .btn-green { background:#10b981; } .btn-blue { background:#3b82f6; } .btn-red { background:#ef4444; }
         .multi-preview { display: flex; gap: 8px; overflow-x: auto; margin-top: 5px; }
         .multi-preview img { height: 60px; border-radius: 4px; border: 1px solid #eee; }
         .kyc-details { font-size: 13px; color: #444; line-height: 1.6; }
-        
+        .error-msg { color: #ff6b6b; font-size: 13px; margin-top: 10px; display: none; }
+
         @media (max-width: 768px) { body { flex-direction: column; height: 100vh; } aside { width: 100%; height: auto; flex-direction: row; overflow-x: auto; align-items: center; padding: 0 10px; } .brand span { display: none; } main { padding: 15px; padding-bottom: 80px; } .upload-form { grid-template-columns: 1fr; gap: 10px; } .full-width { grid-column: span 1; } }
     </style>
 </head>
@@ -57,10 +62,11 @@
 <div id="login-overlay">
     <div class="login-box">
         <h3>RikiApp Admin</h3>
+        <p style="font-size:12px; opacity:0.8; margin-bottom:20px;">Secure Panel Access</p>
         <input type="email" id="adm-email" class="login-input" placeholder="admin@email.com">
         <input type="password" id="adm-pass" class="login-input" placeholder="Password">
         <button class="btn btn-green" style="width:100%; padding:12px; margin-top:10px;" onclick="doLogin()">Login</button>
-        <p id="login-msg" style="color:#ff6b6b; font-size:13px; margin-top:10px;"></p>
+        <p id="login-msg" class="error-msg"></p>
     </div>
 </div>
 
@@ -130,27 +136,36 @@
 
     const categories = { "App": ["Art & Design", "Business", "Education", "Entertainment", "Finance", "Health", "Lifestyle", "Music", "Photography", "Productivity", "Social", "Tools", "Video Players", "Weather"], "Game": ["Action", "Adventure", "Arcade", "Board", "Card", "Puzzle", "Racing", "RPG", "Simulation", "Sports", "Strategy"] };
 
-    // ADMIN CHECK LOGIC
+    // --- SECURE LOGIN LOGIC ---
     auth.onAuthStateChanged(user => {
-        if(user) { 
-            db.ref('users/' + user.uid).once('value').then(snapshot => {
-                const userData = snapshot.val();
-                if(userData && userData.role === 'admin') {
+        if(user) {
+            // Check Database for Admin Role
+            db.ref('users/' + user.uid).once('value').then(snap => {
+                const data = snap.val();
+                if(data && data.role === 'admin') {
                     document.getElementById('login-overlay').style.display = 'none';
                     updateAdminCategories();
                 } else {
-                    document.getElementById('login-msg').innerText = "Access Denied: You are not an Admin!";
+                    // Not Admin -> Kick Out
                     auth.signOut();
+                    const msg = document.getElementById('login-msg');
+                    msg.innerText = "Access Denied: You do not have Admin privileges.";
+                    msg.style.display = 'block';
+                    document.getElementById('login-overlay').style.display = 'flex';
                 }
             });
-        } else { 
-            document.getElementById('login-overlay').style.display = 'flex'; 
+        } else {
+            document.getElementById('login-overlay').style.display = 'flex';
         }
     });
 
     function doLogin() { 
-        document.getElementById('login-msg').innerText = "Checking...";
-        auth.signInWithEmailAndPassword(document.getElementById('adm-email').value, document.getElementById('adm-pass').value).catch(err => {
+        const e = document.getElementById('adm-email').value;
+        const p = document.getElementById('adm-pass').value;
+        if(!e || !p) return;
+        document.getElementById('login-msg').innerText = "Verifying credentials...";
+        document.getElementById('login-msg').style.display = 'block';
+        auth.signInWithEmailAndPassword(e, p).catch(err => {
             document.getElementById('login-msg').innerText = err.message;
         }); 
     }
@@ -161,7 +176,7 @@
     db.ref('paymentRequests').on('value', snap => { const t = document.getElementById('tbl-pay'); t.innerHTML = ''; snap.forEach(c => { const d = c.val(); if(d.status === 'pending') t.innerHTML += `<tr><td>${d.uid}</td><td>${d.txnId}</td><td><a href="${d.screenshot}" target="_blank">View</a></td><td><button class="btn btn-green" onclick="approvePayment('${c.key}','${d.uid}')">Approve Payment</button></td></tr>`; }); });
     function approvePayment(key, uid) { db.ref('paymentRequests/'+key).update({status:'approved'}); db.ref('developers/'+uid).update({paymentStatus:'approved'}); }
 
-    db.ref('kycData').on('value', snap => { const t = document.getElementById('tbl-kyc'); t.innerHTML = ''; snap.forEach(c => { const d = c.val(); db.ref('developers/'+c.key).once('value', devSnap => { const dev = devSnap.val(); if(dev && dev.kycStatus === 'pending') { t.innerHTML += `<tr><td><b>${d.legalName}</b><br>${d.email}</td><td><div class="kyc-details">Aadhar: ${d.aadhar}<br>PAN: ${d.pan}<br>Mobile: ${d.mobile}<br>Addr: ${d.address}<br>Web: ${d.website||'N/A'}</div></td><td>${d.accType}</td><td><button class="btn btn-green" onclick="approveKYC('${c.key}')">Unlock Account</button></td></tr>`; } }); }); });
+    db.ref('kycData').on('value', snap => { const t = document.getElementById('tbl-kyc'); t.innerHTML = ''; snap.forEach(c => { const d = c.val(); db.ref('developers/'+c.key).once('value', devSnap => { const dev = devSnap.val(); if(dev && dev.kycStatus === 'pending') { t.innerHTML += `<tr><td><b>${d.legalName}</b><br>${d.email}</td><td><div class="kyc-details">Aadhar: ${d.aadhar}<br>PAN: ${d.pan}<br>Mobile: ${d.mobile}<br>Addr: ${d.address}</div></td><td>${d.accType}</td><td><button class="btn btn-green" onclick="approveKYC('${c.key}')">Unlock Account</button></td></tr>`; } }); }); });
     function approveKYC(uid) { if(!confirm("Documents Verified? Unlock Account?")) return; db.ref('developers/'+uid).update({kycStatus:'approved', lifetimePaid:true}); }
 
     db.ref('withdrawals').on('value', snap => { const t = document.getElementById('tbl-wd'); t.innerHTML = ''; snap.forEach(c => { const d = c.val(); if(d.status === 'pending') { t.innerHTML += `<tr><td>${d.uid.substr(0,8)}</td><td><b>₹${d.amount}</b></td><td>${d.method}</td><td><div class="wd-details">${d.details}</div></td><td style="color:orange">${d.status}</td><td><button class="btn btn-green" onclick="approveWD('${c.key}','${d.uid}', ${d.amount})">Pay</button></td></tr>`; } }); });
@@ -184,17 +199,17 @@
         try {
             const upImg = async (f) => { const fd = new FormData(); fd.append("image", f); const r = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {method:'POST', body:fd}); const j=await r.json(); return j.data.url; };
             const iUrl = await upImg(iconFile);
-            const uploadPromises = Array.from(screenFiles).map(file => upImg(file));
-            const sUrls = await Promise.all(uploadPromises);
+            const sUrls = []; for(let i=0; i<screenFiles.length; i++) sUrls.push(await upImg(screenFiles[i]));
 
             status.innerText = "Publishing...";
             await db.ref('apps').push({
                 name: name, type: type, category: cat, privacyPolicy: policy,
                 version: document.getElementById('up-ver').value || '1.0', description: document.getElementById('up-desc').value || '',
                 downloadUrl: url, icon: iUrl, screenshots: sUrls,
-                ownerUid: 'ADMIN', devName: 'RikiApp Official', devEmail: 'admin@rikiapp.com', devWebsite: 'https://rikiapp.com',
+                ownerUid: 'ADMIN', devName: 'RikiApp Official', devEmail: 'admin@rikiapp.com',
                 status: 'published', timestamp: Date.now(), downloads: 0
             });
+
             status.innerText = "Success!"; status.style.color = "green";
             document.querySelectorAll('.upload-form input').forEach(i => i.value = ''); document.getElementById('admin-preview').innerHTML = '';
         } catch(e) { status.innerText = "Error: " + e.message; status.style.color = "red"; }
