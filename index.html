@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RikiApp Store</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #00875F;
+            --surface: #ffffff;
+            --background: #f0f3f6;
+            --text-main: #202124;
+            --text-sec: #5f6368;
+            --border: #dadce0;
+            --card-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        body.dark-mode {
+            --surface: #1e1e1e;
+            --background: #121212;
+            --text-main: #ffffff;
+            --text-sec: #a0a0a0;
+            --border: #333333;
+            --card-shadow: 0 1px 3px rgba(255,255,255,0.05);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; font-family: 'Roboto', sans-serif; background: var(--background); color: var(--text-main); height: 100vh; overflow: hidden; display: flex; flex-direction: column; transition: background 0.3s, color 0.3s; }
+        
+        .hidden { display: none !important; }
+        .btn { border: none; padding: 10px 24px; border-radius: 8px; font-weight: 500; cursor: pointer; font-size: 14px; transition: 0.2s; }
+        .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(0,135,95,0.3); }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--primary); }
+        
+        .input-group { margin-bottom: 16px; width: 100%; }
+        .input-group label { display: block; margin-bottom: 6px; color: var(--text-sec); font-size: 12px; }
+        input, textarea, select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 16px; outline: none; background: var(--surface); color: var(--text-main); }
+        
+        /* VIEWS */
+        #splash-screen, #auth-overlay, #main-app, #page-overlays { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        #main-app { pointer-events: auto; display: flex; flex-direction: column; z-index: 10; }
+        
+        /* SPLASH SCREEN */
+        #splash-screen { 
+            background: linear-gradient(135deg, #001e17 0%, #004d40 100%);
+            z-index: 9999; pointer-events: auto; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            overflow: hidden; position: absolute; width: 100%; height: 100%;
+            transition: opacity 0.8s ease-out;
+        }
+        .splash-circle {
+            width: 140px; height: 140px; background: white; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 30px rgba(0, 255, 150, 0.4);
+            animation: floatLogo 3s ease-in-out infinite; z-index: 2; margin-bottom: 20px;
+        }
+        .splash-logo { width: 90px; height: 90px; object-fit: contain; }
+        .splash-text { color: white; font-size: 28px; font-weight: 700; letter-spacing: 1px; z-index: 2; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        .floating-icon { position: absolute; bottom: -60px; color: rgba(255, 255, 255, 0.1); font-size: 30px; animation: floatUp 5s linear infinite; z-index: 1; }
+        
+        @keyframes floatUp { 0% { transform: translateY(0) scale(0.8); opacity: 0; } 20% { opacity: 0.6; } 100% { transform: translateY(-110vh) scale(1.2); opacity: 0; } }
+        @keyframes floatLogo { 0%, 100% { transform: translateY(0px); box-shadow: 0 0 30px rgba(0, 255, 150, 0.4); } 50% { transform: translateY(-10px); box-shadow: 0 0 50px rgba(0, 255, 150, 0.6); } }
+
+        /* AUTH OVERLAY */
+        #auth-overlay { 
+            background: var(--surface); z-index: 200; pointer-events: auto; 
+            display: flex; flex-direction: column; justify-content: center; 
+            padding: 32px; transform: translateY(100%); transition: transform 0.3s; 
+            position: fixed; width: 100%; height: 100%;
+        }
+        #auth-overlay.open { transform: translateY(0); }
+
+        /* HEADER & LIST */
+        header { padding: 16px; display: flex; align-items: center; justify-content: space-between; background: var(--surface); box-shadow: 0 1px 0 var(--border); z-index: 10; }
+        .search-bar { flex: 1; background: var(--background); padding: 6px 16px; border-radius: 8px; display: flex; align-items: center; margin-right: 16px; border: 1px solid var(--border); }
+        .search-bar input { border: none; background: transparent; padding: 8px; outline: none; font-size: 16px; width: 100%; color: var(--text-main); }
+        .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: #ddd; background-size: cover; cursor: pointer; border: 1px solid var(--border); }
+        
+        #scroll-container { flex: 1; overflow-y: auto; padding-bottom: 80px; }
+        .app-list-item { display: flex; padding: 16px; cursor: pointer; transition: 0.2s; position: relative; }
+        .app-list-item:active { background: rgba(0,0,0,0.05); }
+        .app-icon { width: 64px; height: 64px; border-radius: 14px; background: #eee; object-fit: cover; box-shadow: var(--card-shadow); }
+        .app-info { margin-left: 16px; flex: 1; display: flex; flex-direction: column; justify-content: center; }
+        
+        .edit-btn { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); background: var(--background); padding: 6px 12px; border-radius: 6px; font-size: 12px; border: 1px solid var(--border); color: var(--primary); }
+
+        /* PAGES */
+        .page-view { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--surface); z-index: 50; overflow-y: auto; padding-bottom: 40px; transform: translateX(100%); transition: transform 0.3s; pointer-events: auto; }
+        .page-view.open { transform: translateX(0); }
+        .page-header { padding: 16px; display: flex; align-items: center; border-bottom: 1px solid var(--border); }
+
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--surface); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 8px 0; z-index: 20; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-sec); font-size: 12px; cursor: pointer; flex: 1; }
+        .nav-item.active { color: var(--primary); }
+
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid var(--primary); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; display: none; margin: 10px auto;}
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .upload-area { border: 2px dashed var(--border); border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 10px; cursor: pointer; background: var(--background); }
+        .preview-img { max-width: 100%; height: auto; display: none; margin-top: 5px; border-radius: 6px;}
+        .multi-preview { display: flex; gap: 8px; overflow-x: auto; margin-top: 10px; padding-bottom: 5px; }
+        .multi-preview img { height: 80px; border-radius: 6px; border: 1px solid var(--border); }
+
+        /* WALLET */
+        .wallet-card { background: linear-gradient(135deg, #00875F 0%, #004d40 100%); color: white; padding: 24px; border-radius: 20px; margin-bottom: 24px; box-shadow: 0 10px 20px rgba(0,135,95,0.2); }
+        .wallet-balance { font-size: 32px; font-weight: bold; margin: 10px 0; }
+        .history-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+        .legal-box { background: var(--background); border: 1px solid var(--border); padding: 12px; border-radius: 8px; font-size: 12px; color: var(--text-sec); margin-bottom: 16px; }
+        
+        /* CONTACT & REVIEWS */
+        .dev-contact-section { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); }
+        .dev-contact-row { display: flex; align-items: center; margin-bottom: 10px; font-size: 14px; color: var(--text-main); }
+        .policy-link { display: block; margin-top: 15px; color: var(--primary); text-decoration: none; font-weight: 500; font-size: 14px; }
+        
+        .review-section { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); }
+        .star-input { display: flex; gap: 5px; margin-bottom: 10px; }
+        .star-input i { color: #ddd; font-size: 24px; cursor: pointer; }
+        .star-input i.active { color: #FFC107; }
+        .review-card { background: var(--background); padding: 12px; border-radius: 8px; margin-bottom: 10px; border: 1px solid var(--border); }
+        .review-header { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-sec); margin-bottom: 4px; }
+        .reply-box { background: rgba(0, 135, 95, 0.1); padding: 8px; border-radius: 6px; margin-top: 8px; font-size: 13px; border-left: 3px solid var(--primary); }
+
+        .dialog-overlay { background: rgba(0,0,0,0.6); position:fixed; top:0; left:0; width:100%; height:100%; z-index:200; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:0.2s; backdrop-filter: blur(2px); }
+        .dialog-overlay.show { opacity:1; pointer-events:auto; }
+        .dialog-card { background: var(--surface); width: 90%; max-width: 400px; border-radius: 24px; padding: 24px; transform: scale(0.9); transition:0.2s; color: var(--text-main); }
+        .dialog-overlay.show .dialog-card { transform: scale(1); }
+    </style>
+</head>
+<body>
+
+<div id="splash-screen">
+    <div id="bubbles-container"></div>
+    <div class="splash-circle"><img src="https://i.ibb.co/GQvPFTYx/file-000000001af07206a38c1562e9852d29.png" class="splash-logo"></div>
+    <div class="splash-text">RikiApp</div>
+    <div class="loader" style="display:block; border-color: rgba(255,255,255,0.2); border-top-color: #ffffff; margin-top: 20px;"></div>
+</div>
+
+<div id="main-app">
+    <header>
+        <div class="search-bar">
+            <span class="material-icons-round" style="color:var(--text-sec); margin-right:8px">search</span>
+            <input type="text" id="search-input" placeholder="Search apps">
+        </div>
+        <div class="user-avatar" id="headerAvatar" onclick="handleProfileClick()"></div>
+    </header>
+
+    <div id="scroll-container">
+        <div id="view-home">
+            <h3 style="padding:16px 16px 8px; margin:0; font-size:18px;">Recommended</h3>
+            <div id="apps-container"></div>
+            <div id="no-results" style="text-align:center; padding:20px; color:var(--text-sec); display:none;">No apps found</div>
+        </div>
+        <div id="view-dev" class="hidden" style="padding:16px; padding-bottom:100px;"><div id="dev-content"></div></div>
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="navTo('home')"><span class="material-icons-round">games</span>Apps</div>
+        <div class="nav-item" onclick="navTo('dev')"><span class="material-icons-round">monetization_on</span>Earnings</div>
+    </div>
+</div>
+
+<!-- AUTH OVERLAY -->
+<div id="auth-overlay">
+    <span class="material-icons-round" style="align-self:flex-end; font-size:30px; cursor:pointer; color:var(--text-main)" onclick="closeAuth()">close</span>
+    <div class="splash-logo" style="width:64px; height:64px; align-self:center; display:flex; justify-content:center; align-items:center; background:#00875F; border-radius:16px; margin-bottom:16px;"><span class="material-icons-round" style="font-size:32px; color:white;">lock</span></div>
+    <h2 style="text-align:center;">Sign In / Sign Up</h2>
+    <div class="input-group"><label>Email</label><input type="email" id="auth-email"></div>
+    <div class="input-group"><label>Password</label><input type="password" id="auth-pass"></div>
+    <button class="btn btn-primary" onclick="doLogin()">Sign In</button>
+    <button class="btn btn-outline" style="margin-top:10px;" onclick="doSignup()">Create Account</button>
+    <a href="#" onclick="resetPassword()" style="font-size:12px; color:var(--primary); margin-top:10px; display:block; text-align:center;">Forgot Password?</a>
+    <div id="auth-msg" style="color:red; text-align:center; margin-top:10px; font-size:12px;"></div>
+</div>
+
+<div id="page-detail" class="page-view">
+    <div class="page-header"><span class="material-icons-round" style="margin-right:16px; cursor:pointer; color:var(--text-main)" onclick="closePage('page-detail')">arrow_back</span><span style="font-weight:500">Details</span></div>
+    <div style="padding:24px;">
+        <div style="display:flex; margin-bottom:24px;">
+            <img id="det-icon" style="width:72px; height:72px; border-radius:16px; margin-right:20px; box-shadow:0 4px 8px rgba(0,0,0,0.1);">
+            <div><h1 id="det-title" style="margin:0; font-size:24px;"></h1><div id="det-cat" style="color:var(--primary); font-weight:500; margin-top:4px;"></div><div style="font-size:12px; color:var(--text-sec)">Contains ads</div></div>
+        </div>
+        <button id="btn-install" class="btn btn-primary" style="width:100%; border-radius:24px; padding:12px;">Install</button>
+        <div style="display:flex; overflow-x:auto; gap:10px; margin:20px -24px; padding:0 24px;" id="det-screens"></div>
+        
+        <h3>About</h3>
+        <p id="det-desc" style="color:var(--text-sec); line-height:1.5"></p>
+
+        <div class="dev-contact-section">
+            <h3>Developer Contact</h3>
+            <div class="dev-contact-row"><span class="material-icons-round" style="margin-right:10px">business</span><span id="det-dev-name"></span></div>
+            <div class="dev-contact-row"><span class="material-icons-round" style="margin-right:10px">email</span><span id="det-dev-email"></span></div>
+            <div class="dev-contact-row"><span class="material-icons-round" style="margin-right:10px">location_on</span><span id="det-dev-addr"></span></div>
+            <div class="dev-contact-row" id="det-web-row"><span class="material-icons-round" style="margin-right:10px">language</span><a id="det-website" href="#" target="_blank" style="color:var(--primary);text-decoration:none;">Visit Website</a></div>
+            <a id="det-policy" href="#" target="_blank" class="policy-link">Privacy Policy</a>
+        </div>
+
+        <div class="review-section">
+            <h3>Ratings & Reviews</h3>
+            <div id="review-form">
+                <div class="star-input"><i class="material-icons-round" onclick="setRate(1)">star</i><i class="material-icons-round" onclick="setRate(2)">star</i><i class="material-icons-round" onclick="setRate(3)">star</i><i class="material-icons-round" onclick="setRate(4)">star</i><i class="material-icons-round" onclick="setRate(5)">star</i></div>
+                <textarea id="review-text" rows="2" placeholder="Write a review..."></textarea>
+                <button class="btn btn-primary" style="margin-top:5px; font-size:12px; padding:8px 16px;" onclick="submitReview()">Post Review</button>
+            </div>
+            <div id="reviews-list" style="margin-top:15px"></div>
+        </div>
+    </div>
+</div>
+
+<div id="page-withdraw" class="page-view">
+    <div class="page-header"><span class="material-icons-round" style="margin-right:16px;cursor:pointer" onclick="closePage('page-withdraw')">arrow_back</span><span style="font-weight:500">Withdrawal</span></div>
+    <div style="padding:24px;">
+        <div class="wallet-card"><div>Available Balance</div><div class="wallet-balance" id="withdraw-balance">₹0.00</div></div>
+        <div class="input-group"><label>Amount (INR)</label><input type="number" id="wd-amount" placeholder="Min ₹10"></div>
+        <div class="input-group"><label>Method</label><select id="wd-method"><option value="UPI">UPI</option><option value="Bank">Bank</option><option value="USDT">USDT</option></select></div>
+        <div class="input-group"><label>Details</label><textarea id="wd-details" rows="3" placeholder="Payment Details"></textarea></div>
+        <button class="btn btn-primary" style="width:100%" onclick="submitWithdrawal()">Submit Request</button>
+    </div>
+</div>
+
+<div id="page-profile" class="page-view">
+    <div class="page-header"><span class="material-icons-round" style="margin-right:16px;cursor:pointer" onclick="closePage('page-profile')">arrow_back</span><span style="font-weight:500">Profile</span></div>
+    <div style="padding:24px; text-align:center;">
+        <img id="prof-img" style="width:100px; height:100px; border-radius:50%; object-fit:cover; margin-bottom:16px;">
+        <br><button class="btn btn-outline" onclick="document.getElementById('file-prof').click()">Change Photo</button><input type="file" id="file-prof" hidden onchange="previewSingleImg(this, 'prof-img')">
+        <div class="input-group" style="margin-top:20px; text-align:left;"><label>Display Name</label><input type="text" id="prof-name"></div>
+        <div class="input-group" style="text-align:left;"><label>Website URL</label><input type="url" id="prof-web" placeholder="https://yourwebsite.com"></div>
+        
+        <div id="prof-kyc-info" style="text-align:left; background:var(--background); padding:10px; border-radius:8px; margin-bottom:20px; display:none;"></div>
+        <div style="display:flex; justify-content:space-between; align-items:center; background:var(--background); padding:12px; border-radius:8px; margin-bottom:20px; border:1px solid var(--border);">
+            <div style="display:flex; align-items:center;"><span class="material-icons-round" style="margin-right:10px">dark_mode</span>Dark Mode</div>
+            <label class="switch" style="position:relative; display:inline-block; width:40px; height:24px;"><input type="checkbox" id="dark-toggle" onchange="toggleDark()"><span class="slider" style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:#ccc; transition:.4s; border-radius:24px;"></span><span class="slider-before" style="position:absolute; content:''; height:16px; width:16px; left:4px; bottom:4px; background-color:white; transition:.4s; border-radius:50%;"></span></label>
+            <style> input:checked + .slider { background-color: var(--primary); } input:checked + .slider .slider-before { transform: translateX(16px); } </style>
+        </div>
+        <button class="btn btn-primary" style="width:100%" onclick="saveProfile()">Save Changes</button>
+        <button class="btn" style="width:100%; margin-top:20px; color:red;" onclick="firebase.auth().signOut(); closePage('page-profile')">Log Out</button>
+    </div>
+</div>
+
+<div id="page-create" class="page-view">
+    <div class="page-header"><span class="material-icons-round" style="margin-right:16px;cursor:pointer" onclick="closePage('page-create')">arrow_back</span><span style="font-weight:500" id="create-title">Create App</span></div>
+    <div style="padding:24px;">
+        <input type="hidden" id="edit-app-id">
+        <div class="input-group"><label>App Name</label><input type="text" id="new-name"></div>
+        <div class="input-group"><label>Type</label><select id="new-type" onchange="updateCategories()"><option value="App">App</option><option value="Game">Game</option></select></div>
+        <div class="input-group"><label>Category</label><select id="new-cat"></select></div>
+        <div class="input-group"><label>Description</label><textarea id="new-desc" rows="3"></textarea></div>
+        <div class="input-group"><label>Version</label><input type="text" id="new-ver"></div>
+        <div class="input-group"><label>Privacy Policy URL</label><input type="url" id="new-policy"></div>
+        <div class="input-group"><label>App Icon</label><div class="upload-area" onclick="document.getElementById('file-icon').click()">Select Icon</div><input type="file" id="file-icon" hidden onchange="previewSingleImg(this, 'prev-icon')"><img id="prev-icon" class="preview-img"></div>
+        <div class="input-group"><label>Screenshots (Min 2)</label><div class="upload-area" onclick="document.getElementById('file-screens').click()">Select Screenshots (Multiple)</div><input type="file" id="file-screens" hidden multiple accept="image/*" onchange="previewMultiImgs(this)"><div id="screens-preview" class="multi-preview"></div></div>
+        <div class="input-group"><label>Download URL</label><input type="url" id="new-url"></div>
+        <button class="btn btn-primary" style="width:100%" onclick="submitApp()">Submit for Review</button>
+        <div id="create-loader" class="loader"></div>
+    </div>
+</div>
+
+<div id="install-modal" class="dialog-overlay">
+    <div class="dialog-card">
+        <div style="display:flex; align-items:center; margin-bottom:16px;"><img id="modal-icon" style="width:40px; border-radius:8px; margin-right:12px;"><div><div id="modal-title" style="font-weight:500"></div><small>Permissions required</small></div></div>
+        <p style="color:var(--text-sec); font-size:13px;">• Network Access<br>• Storage Access</p>
+        <div style="text-align:right;"><button class="btn" style="color:var(--text-sec)" onclick="document.getElementById('install-modal').classList.remove('show')">Cancel</button><button class="btn btn-primary" onclick="confirmInstall()">Install</button></div>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyBpK2TQhhdtm9eEGN8TEE6WTW3natf47OA",
+        authDomain: "rikiapp-c3b21.firebaseapp.com",
+        databaseURL: "https://rikiapp-c3b21-default-rtdb.firebaseio.com",
+        projectId: "rikiapp-c3b21",
+        storageBucket: "rikiapp-c3b21.firebasestorage.app",
+        messagingSenderId: "947081687732",
+        appId: "1:947081687732:web:3808455f70e06e95869de1"
+    };
+    const IMGBB_KEY = "07806a9e0f6db8a56403fcc0c909b163";
+    const RATE_PER_DOWNLOAD = 0.001; 
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+
+    let currentUser = null, currentAppId = null, currentAppUrl = null, allApps = [];
+    let currentBalance = 0, currentRating = 0;
+
+    const categories = { "App": ["Art & Design", "Business", "Education", "Entertainment", "Finance", "Health", "Lifestyle", "Music", "Photography", "Productivity", "Social", "Tools", "Weather"], "Game": ["Action", "Adventure", "Arcade", "Board", "Card", "Puzzle", "Racing", "RPG", "Simulation", "Sports", "Strategy"] };
+
+    window.onload = () => { initSplash(); loadApps(); updateCategories(); if(localStorage.getItem('theme') === 'dark') { document.body.classList.add('dark-mode'); document.getElementById('dark-toggle').checked = true; } };
+
+    function initSplash() {
+        const container = document.getElementById('bubbles-container');
+        const icons = ['games', 'apps', 'android', 'rocket_launch', 'star', 'sports_esports', 'cloud_download', 'check_circle', 'category', 'widgets'];
+        for(let i=0; i<15; i++) {
+            const icon = document.createElement('span'); icon.className = 'material-icons-round floating-icon'; icon.innerText = icons[Math.floor(Math.random() * icons.length)];
+            icon.style.left = Math.random() * 100 + '%'; icon.style.animationDuration = (Math.random() * 3 + 2) + 's'; icon.style.animationDelay = (Math.random() * 2) + 's'; container.appendChild(icon);
+        }
+        setTimeout(() => { document.getElementById('splash-screen').style.opacity='0'; setTimeout(()=>document.getElementById('splash-screen').style.display='none', 800);}, 2500);
+    }
+
+    function toggleDark() { document.body.classList.toggle('dark-mode'); localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light'); }
+
+    auth.onAuthStateChanged(user => {
+        currentUser = user;
+        const avatar = document.getElementById('headerAvatar');
+        if(user) {
+            avatar.style.backgroundImage = `url(${user.photoURL || `https://ui-avatars.com/api/?name=${user.email}`})`;
+            db.ref('users/'+user.uid).once('value', s => {
+                const u = s.val();
+                if(u && u.website) document.getElementById('prof-web').value = u.website;
+            });
+            db.ref('kycData/'+user.uid).once('value', s=>{
+                const k = s.val();
+                if(k) {
+                    document.getElementById('prof-kyc-info').style.display='block';
+                    document.getElementById('prof-kyc-info').innerHTML = `<small style="color:var(--primary)"><b>Verified Developer</b></small><br>${k.legalName}<br>${k.address}`;
+                }
+            });
+        } else { avatar.style.backgroundImage = ''; avatar.innerHTML = '<span class="material-icons-round" style="font-size:24px; color:#666;">person</span>'; }
+    });
+
+    window.updateCategories = () => { const type = document.getElementById('new-type').value; const catSelect = document.getElementById('new-cat'); catSelect.innerHTML = ""; categories[type].forEach(c => { const opt = document.createElement('option'); opt.value = c; opt.innerText = c; catSelect.appendChild(opt); }); }
+    window.navTo = (tab) => { document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active')); if(tab === 'home') { document.querySelectorAll('.nav-item')[0].classList.add('active'); document.getElementById('view-home').classList.remove('hidden'); document.getElementById('view-dev').classList.add('hidden'); } else { if(!currentUser) return document.getElementById('auth-overlay').classList.add('open'); document.querySelectorAll('.nav-item')[1].classList.add('active'); document.getElementById('view-home').classList.add('hidden'); document.getElementById('view-dev').classList.remove('hidden'); loadDevContent(); } }
+
+    // FIXED LOAD APPS & SEARCH LOGIC
+    function loadApps() {
+        db.ref('apps').orderByChild('status').equalTo('published').on('value', snap => {
+            allApps = [];
+            snap.forEach(c => { allApps.push({key: c.key, ...c.val()}); });
+            renderApps(allApps);
+        });
+    }
+
+    function renderApps(list) {
+        const container = document.getElementById('apps-container');
+        const noRes = document.getElementById('no-results');
+        container.innerHTML = '';
+        if(list.length === 0) { noRes.style.display = 'block'; } 
+        else {
+            noRes.style.display = 'none';
+            list.forEach(app => {
+                container.innerHTML += `<div class="app-list-item" onclick="openDetail('${app.key}')"><img class="app-icon" src="${app.icon}"><div class="app-info"><div style="font-size:16px; font-weight:bold">${app.name}</div><div style="font-size:12px; color:var(--text-sec)">${app.category || 'App'} • 4.5★</div></div></div>`;
+            });
+        }
+    }
+
+    // SEARCH LISTENER FIX
+    document.getElementById('search-input').addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        const filtered = allApps.filter(app => app.name.toLowerCase().includes(term));
+        renderApps(filtered);
+    });
+
+    window.openDetail = (key) => {
+        currentAppId = key;
+        const app = allApps.find(a => a.key === key);
+        currentAppUrl = app.downloadUrl;
+        document.getElementById('det-title').innerText = app.name;
+        document.getElementById('det-icon').src = app.icon;
+        document.getElementById('det-desc').innerText = app.description;
+        document.getElementById('det-cat').innerText = `${app.category} • ${app.type}`;
+        
+        document.getElementById('det-dev-name').innerText = app.devName || "RikiApp Developer";
+        document.getElementById('det-dev-email').innerText = app.devEmail || "support@rikiapp.com";
+        document.getElementById('det-dev-addr').innerText = app.devAddr || "India";
+        
+        const webRow = document.getElementById('det-web-row');
+        const webLink = document.getElementById('det-website');
+        if(app.devWebsite) { webLink.href = app.devWebsite; webRow.style.display = 'flex'; } else { webRow.style.display = 'none'; }
+        
+        const policyLink = document.getElementById('det-policy');
+        if(app.privacyPolicy) { policyLink.href = app.privacyPolicy; policyLink.style.display = 'block'; } else { policyLink.style.display = 'none'; }
+
+        const screens = document.getElementById('det-screens'); screens.innerHTML = '';
+        if(app.screenshots) app.screenshots.forEach(s => screens.innerHTML += `<img src="${s}" style="height:200px; border-radius:8px">`);
+        
+        const btn = document.getElementById('btn-install');
+        btn.innerText = "Install"; btn.className = "btn btn-primary"; btn.onclick = tryInstall;
+        if(currentUser) { db.ref(`installs/${currentUser.uid}/${key}`).once('value', s => { if(s.exists()) { btn.innerText = "Open"; btn.className = "btn btn-outline"; btn.onclick = () => window.location.href = currentAppUrl; } }); }
+        
+        loadReviews(key, app.ownerUid);
+        document.getElementById('page-detail').classList.add('open');
+    }
+
+    window.setRate = (n) => { currentRating = n; const stars = document.querySelectorAll('.star-input i'); stars.forEach((s, i) => s.classList.toggle('active', i < n)); }
+
+    window.submitReview = async () => {
+        if(!currentUser) return document.getElementById('auth-overlay').classList.add('open');
+        const app = allApps.find(a => a.key === currentAppId);
+        if(app.ownerUid === currentUser.uid) return alert("Owners cannot review their own app.");
+        const installSnap = await db.ref(`installs/${currentUser.uid}/${currentAppId}`).once('value');
+        if(!installSnap.exists()) return alert("You must install the app to review it.");
+        const text = document.getElementById('review-text').value;
+        if(!currentRating || !text) return alert("Rate & write something!");
+        const review = { userId: currentUser.uid, userName: currentUser.displayName || "User", userPhoto: currentUser.photoURL, rating: currentRating, comment: text, timestamp: Date.now() };
+        db.ref(`reviews/${currentAppId}`).push(review);
+        document.getElementById('review-text').value = ''; setRate(0);
+    }
+
+    function loadReviews(appId, ownerUid) {
+        db.ref(`reviews/${appId}`).on('value', snap => {
+            const list = document.getElementById('reviews-list'); list.innerHTML = '';
+            snap.forEach(r => {
+                const d = r.val();
+                let replyHtml = '';
+                if(d.reply) replyHtml = `<div class="reply-box"><b>Developer Response:</b><br>${d.reply}</div>`;
+                else if(currentUser && currentUser.uid === ownerUid) {
+                    replyHtml = `<div style="margin-top:5px;"><input type="text" id="rep-${r.key}" placeholder="Reply..." style="font-size:12px;padding:4px;width:70%"><button onclick="submitReply('${appId}','${r.key}')" class="btn btn-primary" style="padding:4px 8px;font-size:10px;margin-left:5px">Reply</button></div>`;
+                }
+                list.innerHTML += `<div class="review-card"><div class="review-header"><b>${d.userName}</b><span>${new Date(d.timestamp).toLocaleDateString()}</span></div><div style="color:#FFC107;font-size:12px;">${'★'.repeat(d.rating)}</div><div style="font-size:13px;margin-top:4px;">${d.comment}</div>${replyHtml}</div>`;
+            });
+        });
+    }
+
+    window.submitReply = (appId, reviewId) => { const text = document.getElementById(`rep-${reviewId}`).value; if(text) db.ref(`reviews/${appId}/${reviewId}/reply`).set(text); }
+    window.tryInstall = () => { if(!currentUser) return document.getElementById('auth-overlay').classList.add('open'); const app = allApps.find(a => a.key === currentAppId); document.getElementById('modal-icon').src = app.icon; document.getElementById('modal-title').innerText = app.name; document.getElementById('install-modal').classList.add('show'); }
+    window.confirmInstall = () => { document.getElementById('install-modal').classList.remove('show'); const btn = document.getElementById('btn-install'); btn.innerText = "Installing..."; btn.disabled = true; db.ref('apps/' + currentAppId + '/downloads').transaction(current => (current || 0) + 1); setTimeout(() => { db.ref(`installs/${currentUser.uid}/${currentAppId}`).set({installed:true, ts: Date.now()}).then(() => { btn.innerText = "Open"; btn.className = "btn btn-outline"; btn.disabled = false; btn.onclick = () => window.location.href = currentAppUrl; }); }, 2000); }
+
+    window.doLogin = () => auth.signInWithEmailAndPassword(document.getElementById('auth-email').value, document.getElementById('auth-pass').value).then(()=>document.getElementById('auth-overlay').classList.remove('open')).catch(e=>document.getElementById('auth-msg').innerText=e.message);
+    window.doSignup = () => auth.createUserWithEmailAndPassword(document.getElementById('auth-email').value, document.getElementById('auth-pass').value).then(c=>{db.ref('users/'+c.user.uid).set({email:c.user.email}); document.getElementById('auth-overlay').classList.remove('open');}).catch(e=>document.getElementById('auth-msg').innerText=e.message);
+    window.resetPassword = () => { const email = document.getElementById('auth-email').value; if(!email) return alert("Enter email first"); auth.sendPasswordResetEmail(email).then(() => alert("Reset link sent!")).catch(e => alert(e.message)); }
+    window.handleProfileClick = () => { if(!currentUser) document.getElementById('auth-overlay').classList.add('open'); else { document.getElementById('prof-name').value=currentUser.displayName||''; document.getElementById('prof-img').src=currentUser.photoURL||`https://ui-avatars.com/api/?name=${currentUser.email}`; document.getElementById('page-profile').classList.add('open'); } }
+    window.closeAuth = () => document.getElementById('auth-overlay').classList.remove('open'); window.closePage = (id) => document.getElementById(id).classList.remove('open');
+
+    function loadDevContent() {
+        const div = document.getElementById('dev-content');
+        db.ref('developers/'+currentUser.uid).on('value', s => {
+            const d = s.val() || {};
+            if(!d.paymentStatus) { div.innerHTML = `<div style="text-align:center;padding:20px;"><span class="material-icons-round" style="font-size:48px;color:var(--primary)">verified</span><h2>Become a Developer</h2><p>Step 1/2: Pay ₹299 Lifetime Fee</p><a href="https://www.upi.me/pay?pa=8327888751@amazonpay&am=299&tn=DevFee" class="btn btn-primary">Pay ₹299 UPI</a><div style="margin-top:20px;text-align:left;"><input type="text" id="pay-utr" placeholder="Transaction ID (UTR)" style="margin-bottom:10px;"><button class="btn btn-outline" onclick="document.getElementById('file-pay').click()">Upload Screenshot</button><input type="file" id="file-pay" hidden onchange="previewSingleImg(this,'prev-pay')"><img id="prev-pay" class="preview-img" style="display:none;margin-bottom:10px;"><button class="btn btn-primary" style="width:100%;margin-top:10px;" onclick="submitPay()">Submit Payment</button></div></div>`; return; }
+            if(d.paymentStatus === 'pending') { div.innerHTML = `<div style="text-align:center;padding:40px;"><span class="material-icons-round" style="font-size:48px;color:orange">pending</span><h3>Payment Under Review</h3></div>`; return; }
+            if(d.paymentStatus === 'approved' && !d.kycStatus) { div.innerHTML = `<div style="padding:16px;"><h2>Developer Verification</h2><p>Step 2/2: Submit your details.</p><div class="legal-box"><b>LEGAL:</b> Identity verification for app publishers.</div><div class="input-group"><label>Account Type</label><select id="kyc-type"><option value="Personal">Personal</option><option value="Organization">Organization</option></select></div><div class="input-group"><label>Console Name</label><input type="text" id="kyc-devname"></div><div class="input-group"><label>Full Name</label><input type="text" id="kyc-name"></div><div class="input-group"><label>Website (Optional)</label><input type="url" id="kyc-web" placeholder="https://"></div><div class="input-group"><label>Address</label><textarea id="kyc-addr"></textarea></div><div class="input-group"><label>Mobile</label><input type="number" id="kyc-mobile"></div><div class="input-group"><label>Aadhar</label><input type="text" id="kyc-aadhar"></div><div class="input-group"><label>PAN</label><input type="text" id="kyc-pan"></div><button class="btn btn-primary" style="width:100%" onclick="submitKYC()">Submit Verification</button></div>`; return; }
+            if(d.kycStatus === 'pending') { div.innerHTML = `<div style="text-align:center;padding:40px;"><span class="material-icons-round" style="font-size:48px;color:orange">admin_panel_settings</span><h3>Verification In Progress</h3></div>`; return; }
+            if(d.lifetimePaid && d.kycStatus === 'approved') {
+                let totalDownloads = 0; let totalWithdrawn = d.paidOut || 0;
+                db.ref('apps').orderByChild('ownerUid').equalTo(currentUser.uid).once('value', appsSnap => {
+                    let myAppsHtml = '';
+                    appsSnap.forEach(appSnap => {
+                        const app = appSnap.val(); totalDownloads += (app.downloads || 0);
+                        myAppsHtml += `<div class="app-list-item" style="border-left:3px solid ${app.status==='published'?'green':'orange'}"><img src="${app.icon}" class="app-icon"><div class="app-info"><b>${app.name}</b><div>${app.status} • ${app.downloads||0} DLs</div></div><button class="edit-btn" onclick="editApp('${appSnap.key}')">Edit</button></div>`;
+                    });
+                    let totalEarnings = totalDownloads * RATE_PER_DOWNLOAD; currentBalance = totalEarnings - totalWithdrawn; if(currentBalance < 0) currentBalance = 0;
+                    div.innerHTML = `<div class="wallet-card"><div>Wallet Balance</div><div class="wallet-balance">₹${currentBalance.toFixed(2)}</div><div style="font-size:12px">Total Earnings: ₹${totalEarnings.toFixed(2)}</div><button class="btn" style="background:rgba(255,255,255,0.2); color:white; margin-top:10px; width:100%" onclick="openWithdraw()">Withdraw Funds</button></div><button class="btn btn-primary" style="width:100%; margin-bottom:20px" onclick="openCreateApp()">+ Create App</button><h4>Withdrawal History</h4><div id="wd-history"></div><h4 style="margin-top:24px;">My Apps</h4>${myAppsHtml}`;
+                    db.ref('withdrawals').orderByChild('uid').equalTo(currentUser.uid).on('value', wdSnap => { const hDiv = document.getElementById('wd-history'); if(hDiv) { hDiv.innerHTML = ''; if(!wdSnap.exists()) hDiv.innerHTML = '<small>No history found</small>'; wdSnap.forEach(w => { const wd = w.val(); hDiv.innerHTML += `<div class="history-item"><div><b>₹${wd.amount}</b> via ${wd.method}</div><div class="status-${wd.status}">${wd.status.toUpperCase()}</div></div>`; }); } });
+                });
+            }
+        });
+    }
+
+    window.openCreateApp = () => { document.getElementById('create-title').innerText = "Create App"; document.getElementById('edit-app-id').value = ""; document.querySelectorAll('#page-create input, #page-create textarea').forEach(i => i.value = ""); document.getElementById('prev-icon').style.display='none'; document.getElementById('screens-preview').innerHTML = ''; document.getElementById('page-create').classList.add('open'); }
+    window.editApp = (appId) => { document.getElementById('create-title').innerText = "Edit App (Update)"; document.getElementById('edit-app-id').value = appId; db.ref('apps/'+appId).once('value', s => { const a = s.val(); document.getElementById('new-name').value = a.name; document.getElementById('new-type').value = a.type; updateCategories(); document.getElementById('new-cat').value = a.category; document.getElementById('new-desc').value = a.description; document.getElementById('new-ver').value = a.version; document.getElementById('new-policy').value = a.privacyPolicy; document.getElementById('new-url').value = a.downloadUrl; document.getElementById('prev-icon').src = a.icon; document.getElementById('prev-icon').style.display = 'block'; document.getElementById('page-create').classList.add('open'); }); }
+    window.openWithdraw = () => { document.getElementById('withdraw-balance').innerText = `₹${currentBalance.toFixed(2)}`; document.getElementById('page-withdraw').classList.add('open'); }
+    window.submitWithdrawal = async () => { const amt = parseFloat(document.getElementById('wd-amount').value); const method = document.getElementById('wd-method').value; const det = document.getElementById('wd-details').value; if(!amt || amt < 10) return alert("Min withdrawal ₹10"); if(amt > currentBalance) return alert("Insufficient Balance"); if(!det) return alert("Enter Payment Details"); await db.ref('withdrawals').push({ uid: currentUser.uid, amount: amt, method: method, details: det, status: 'pending', timestamp: Date.now() }); alert("Request Submitted"); closePage('page-withdraw'); }
+    window.previewSingleImg = (input, id) => { const r=new FileReader(); r.onload=e=>{const i=document.getElementById(id); i.src=e.target.result; i.style.display='block'}; r.readAsDataURL(input.files[0]); }
+    window.previewMultiImgs = (input) => { const c=document.getElementById('screens-preview'); c.innerHTML=''; for(let i=0;i<Math.min(input.files.length,8);i++){ const r=new FileReader(); r.onload=e=>{const img=document.createElement('img'); img.src=e.target.result; c.appendChild(img)}; r.readAsDataURL(input.files[i]); } }
+    async function upload(file) { const fd=new FormData(); fd.append("image", file); try{const r=await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {method:'POST',body:fd}); const j=await r.json(); return j.data.url;}catch(e){return null;} }
+    
+    window.saveProfile = async () => { document.getElementById('page-profile').style.opacity='0.5'; let url=currentUser.photoURL; const f=document.getElementById('file-prof').files[0]; if(f) url=await upload(f); await currentUser.updateProfile({displayName:document.getElementById('prof-name').value, photoURL:url}); await db.ref('users/'+currentUser.uid).update({ website: document.getElementById('prof-web').value }); document.getElementById('page-profile').style.opacity='1'; closePage('page-profile'); }
+    window.submitPay = async () => { const utr=document.getElementById('pay-utr').value; const f=document.getElementById('file-pay').files[0]; if(!utr||!f)return alert("Missing info"); const url=await upload(f); db.ref('paymentRequests').push({uid:currentUser.uid, txnId:utr, screenshot:url, status:'pending'}); db.ref('developers/'+currentUser.uid).update({paymentStatus:'pending'}); alert("Payment Submitted"); }
+    window.submitKYC = async () => { const data = { accType: document.getElementById('kyc-type').value, consoleName: document.getElementById('kyc-devname').value, legalName: document.getElementById('kyc-name').value, website: document.getElementById('kyc-web').value, address: document.getElementById('kyc-addr').value, mobile: document.getElementById('kyc-mobile').value, aadhar: document.getElementById('kyc-aadhar').value, pan: document.getElementById('kyc-pan').value, uid: currentUser.uid, email: currentUser.email }; if(!data.consoleName || !data.aadhar || !data.pan) return alert("Fill all fields"); await db.ref('kycData/'+currentUser.uid).set(data); await db.ref('developers/'+currentUser.uid).update({kycStatus: 'pending'}); alert("Verification Submitted!"); }
+
+    window.submitApp = async () => {
+        const editId = document.getElementById('edit-app-id').value;
+        const name = document.getElementById('new-name').value;
+        const url = document.getElementById('new-url').value;
+        const iconFile = document.getElementById('file-icon').files[0];
+        const screenFiles = document.getElementById('file-screens').files;
+        if(!name||!url) return alert("Fill required fields");
+        if(!editId && (!iconFile || screenFiles.length < 2)) return alert("Icon and 2 screenshots required for new app");
+        document.getElementById('create-loader').style.display='block';
+        try {
+            let iUrl = null, sUrls = null;
+            if(iconFile) iUrl = await upload(iconFile);
+            if(screenFiles.length > 0) { const uploadPromises = Array.from(screenFiles).map(file => upload(file)); sUrls = await Promise.all(uploadPromises); }
+            const userSnap = await db.ref('users/'+currentUser.uid).once('value'); const userData = userSnap.val() || {};
+            const devSnap = await db.ref('kycData/'+currentUser.uid).once('value'); const devData = devSnap.val() || {};
+            const website = userData.website || devData.website || "";
+            const appData = { name: name, type: document.getElementById('new-type').value, category: document.getElementById('new-cat').value, privacyPolicy: document.getElementById('new-policy').value, description: document.getElementById('new-desc').value, version: document.getElementById('new-ver').value, downloadUrl: url, status: 'pending', ownerUid: currentUser.uid, devName: devData.consoleName||"Unknown", devEmail: currentUser.email, devAddr: devData.address||"Hidden", devWebsite: website };
+            if(iUrl) appData.icon = iUrl; if(sUrls) appData.screenshots = sUrls;
+            if(editId) await db.ref('apps/'+editId).update(appData); else { appData.downloads = 0; await db.ref('apps').push(appData); }
+            document.getElementById('create-loader').style.display='none'; closePage('page-create'); alert("Submitted for review");
+        } catch(e) { document.getElementById('create-loader').style.display='none'; alert("Upload failed"); }
+    }
+</script>
+</body>
+</html>
