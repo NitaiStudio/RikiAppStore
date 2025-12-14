@@ -1,0 +1,20 @@
+{
+  "name": "RikiApp Store",
+  "short_name": "RikiApp",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#00875F",
+  "theme_color": "#00875F",
+  "icons": [
+    {
+      "src": "https://i.ibb.co/GQvPFTYx/file-000000001af07206a38c1562e9852d29.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://i.ibb.co/GQvPFTYx/file-000000001af07206a38c1562e9852d29.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
