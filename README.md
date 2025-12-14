@@ -1,95 +1,27 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>RikiApp – Open Android App & Game Store</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+🚀 RikiApp
 
-  <!-- SEO -->
-  <meta name="description" content="RikiApp is a fast and secure Android App & Game Store. Download apps and games without Play Store. Lightweight, privacy-friendly, modern UI.">
-  <meta name="keywords" content="RikiApp, Android App Store, Game Store, APK Download, Play Store Alternative">
+Open Android App & Game Store (Lightweight • Fast • Secure)
 
-  <!-- Google Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+RikiApp is a modern Android App & Game Store that allows users to easily browse, download, and update apps and games. It is optimized for low-end devices, features a lightweight and fast interface, uses minimal ads, and is built with a strong focus on user privacy.
 
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Inter', sans-serif;
-      background: #f5f7fb;
-      color: #222;
-    }
-    header {
-      background: linear-gradient(135deg, #4f46e5, #7c3aed);
-      color: #fff;
-      padding: 40px 20px;
-      text-align: center;
-    }
-    header h1 {
-      margin: 0;
-      font-size: 32px;
-    }
-    header p {
-      margin-top: 10px;
-      font-size: 16px;
-      opacity: 0.95;
-    }
-    .btn {
-      display: inline-block;
-      margin: 12px 8px 0;
-      padding: 12px 20px;
-      background: #fff;
-      color: #4f46e5;
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: 600;
-    }
-    .btn.secondary {
-      background: transparent;
-      border: 2px solid #fff;
-      color: #fff;
-    }
-    section {
-      padding: 40px 20px;
-      max-width: 1100px;
-      margin: auto;
-    }
-    h2 {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    .features {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 20px;
-    }
-    .card {
-      background: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.06);
-    }
-    .screenshots {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 15px;
-    }
-    .screenshots img {
-      width: 100%;
-      border-radius: 12px;
-    }
-    footer {
-      background: #111827;
-      color: #9ca3af;
-      padding: 30px 20px;
-      text-align: center;
-      font-size: 14px;
-    }
-    footer a {
-      color: #a5b4fc;
-      text-decoration: none;
-    }
-  </style>
+
+---
+
+✨ Features
+
+📦 Android Apps & Games Store
+
+⚡ Fast downloads with lightweight UI
+
+🎮 Games & 📱 Apps category-wise browsing
+
+🔄 Auto update check
+
+🛡️ No tracking, privacy-friendly
+
+🌙 Material Design (Android-style UI)
+
+🌍 Works worldwide
 </head>
 
 <body>
