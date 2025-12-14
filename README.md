@@ -25,9 +25,8 @@ RikiApp is a modern Android App & Game Store that allows users to easily browse,
 
 📥 Download RikiApp
 
-🌐 Website: https://rikiapp.example.com
+🌐 Website: https://nitaistudio.github.io/RikiAppStore/
 
-⬇️ Direct APK: https://rikiapp.example.com/download
 
 🧩 Alt Store: Aurora / Open source stores
 
