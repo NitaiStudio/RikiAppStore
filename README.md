@@ -1,8 +1,4 @@
-🚀 RikiApp
-
-Open Android App & Game Store (Lightweight • Fast • Secure)
-
-RikiApp হলো একটি আধুনিক Android App & Game Store যেখানে ব্যবহারকারীরা সহজে অ্যাপ ও গেম ব্রাউজ, ডাউনলোড এবং আপডেট করতে পারে। এটি low-end device friendly, ad-light এবং privacy-focused।
+RikiApp is a modern Android App & Game Store that allows users to easily browse, download, and update apps and games. It is optimized for low-end devices, features a lightweight and fast interface, uses minimal ads, and is built with a strong focus on user privacy.
 
 
 ---
