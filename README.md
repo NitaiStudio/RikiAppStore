@@ -13,11 +13,11 @@
   <br>
 
   <!-- CALL TO ACTION BUTTONS -->
-  <a href="https://nitaistudio.github.io/RikiApp/" target="_blank">
+  <a href="https://nitaistudio.github.io/RikiAppStore/" target="_blank">
     <img src="https://img.shields.io/badge/📲_Install-RikiApp_Store-00875F?style=for-the-badge&logo=android&logoColor=white" height="50" />
   </a>
   &nbsp;&nbsp;
-  <a href="https://nitaistudio.github.io/RikiApp/" target="_blank">
+  <a href="https://nitaistudio.github.io/RikiAppStore/" target="_blank">
     <img src="https://img.shields.io/badge/🌐_Visit-Website-202124?style=for-the-badge&logo=google-chrome&logoColor=white" height="50" />
   </a>
   &nbsp;&nbsp;
@@ -120,7 +120,7 @@ Here is a glimpse of the **RikiApp** user interface. Clean, Modern, and User-Fri
 ## 🚀 How to Install (PWA)
 Since RikiApp is a next-gen PWA, you don't need the Play Store to install it!
 
-1.  Open [RikiApp Store Link](https://nitaistudio.github.io/RikiApp/).
+1.  Open [RikiApp Store Link](https://nitaistudio.github.io/RikiAppStore/).
 2.  Wait for the **"Add to Home Screen"** prompt.
 3.  Click **Install**.
 4.  Enjoy the native app experience!
