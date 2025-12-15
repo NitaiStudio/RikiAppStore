@@ -229,7 +229,7 @@
     <div style="padding:24px;">
         <div class="wallet-card"><div>Available Balance</div><div class="wallet-balance" id="withdraw-balance">₹0.00</div></div>
         <div class="input-group"><label>Amount (INR)</label><input type="number" id="wd-amount" placeholder="Min ₹10"></div>
-        <div class="input-group"><label>Method</label><select id="wd-method"><option value="UPI">UPI</option><option value="Bank">Bank</option><option value="USDT">USDT</option></select></div>
+        <div class="input-group"><label>Method</label><select id="wd-method"><option value="UPI">UPI</option><option value="Bank">Bank</option><option value="USDT">USDT Trc20</option></select></div>
         <div class="input-group"><label>Details</label><textarea id="wd-details" rows="3" placeholder="Payment Details"></textarea></div>
         <button class="btn btn-primary" style="width:100%" onclick="submitWithdrawal()">Submit Request</button>
     </div>
@@ -381,7 +381,7 @@
         document.getElementById('det-cat').innerText = `${app.category} • ${app.type}`;
         
         document.getElementById('det-dev-name').innerText = app.devName || "RikiApp Developer";
-        document.getElementById('det-dev-email').innerText = app.devEmail || "support@rikiapp.com";
+        document.getElementById('det-dev-email').innerText = app.devEmail || "nitai.grp00@gmail.com";
         document.getElementById('det-dev-addr').innerText = app.devAddr || "India";
         
         const webRow = document.getElementById('det-web-row');
@@ -446,7 +446,7 @@
         const div = document.getElementById('dev-content');
         db.ref('developers/'+currentUser.uid).on('value', s => {
             const d = s.val() || {};
-            if(!d.paymentStatus) { div.innerHTML = `<div style="text-align:center;padding:20px;"><span class="material-icons-round" style="font-size:48px;color:var(--primary)">verified</span><h2>Become a Developer</h2><p>Step 1/2: Pay ₹299 Lifetime Fee</p><a href="https://www.upi.me/pay?pa=8327888751@amazonpay&am=299&tn=DevFee" class="btn btn-primary">Pay ₹299 UPI</a><div style="margin-top:20px;text-align:left;"><input type="text" id="pay-utr" placeholder="Transaction ID (UTR)" style="margin-bottom:10px;"><button class="btn btn-outline" onclick="document.getElementById('file-pay').click()">Upload Screenshot</button><input type="file" id="file-pay" hidden onchange="previewSingleImg(this,'prev-pay')"><img id="prev-pay" class="preview-img" style="display:none;margin-bottom:10px;"><button class="btn btn-primary" style="width:100%;margin-top:10px;" onclick="submitPay()">Submit Payment</button></div></div>`; return; }
+            if(!d.paymentStatus) { div.innerHTML = `<div style="text-align:center;padding:20px;"><span class="material-icons-round" style="font-size:48px;color:var(--primary)">verified</span><h2>Become a Developer</h2><p>Step 1/2: Pay ₹10 Lifetime Fee</p><a href="https://www.upi.me/pay?pa=8327888751@amazonpay&am=10&tn=Account Creation Lifetime paid For Devloper" class="btn btn-primary">Pay ₹10 UPI</a><div style="margin-top:20px;text-align:left;"><input type="text" id="pay-utr" placeholder="Transaction ID (UTR)" style="margin-bottom:10px;"><button class="btn btn-outline" onclick="document.getElementById('file-pay').click()">Upload Screenshot</button><input type="file" id="file-pay" hidden onchange="previewSingleImg(this,'prev-pay')"><img id="prev-pay" class="preview-img" style="display:none;margin-bottom:10px;"><button class="btn btn-primary" style="width:100%;margin-top:10px;" onclick="submitPay()">Submit Payment</button></div></div>`; return; }
             if(d.paymentStatus === 'pending') { div.innerHTML = `<div style="text-align:center;padding:40px;"><span class="material-icons-round" style="font-size:48px;color:orange">pending</span><h3>Payment Under Review</h3></div>`; return; }
             if(d.paymentStatus === 'approved' && !d.kycStatus) { div.innerHTML = `<div style="padding:16px;"><h2>Developer Verification</h2><p>Step 2/2: Submit your details.</p><div class="legal-box"><b>LEGAL:</b> Identity verification for app publishers.</div><div class="input-group"><label>Account Type</label><select id="kyc-type"><option value="Personal">Personal</option><option value="Organization">Organization</option></select></div><div class="input-group"><label>Console Name</label><input type="text" id="kyc-devname"></div><div class="input-group"><label>Full Name</label><input type="text" id="kyc-name"></div><div class="input-group"><label>Website (Optional)</label><input type="url" id="kyc-web" placeholder="https://"></div><div class="input-group"><label>Address</label><textarea id="kyc-addr"></textarea></div><div class="input-group"><label>Mobile</label><input type="number" id="kyc-mobile"></div><div class="input-group"><label>Aadhar</label><input type="text" id="kyc-aadhar"></div><div class="input-group"><label>PAN</label><input type="text" id="kyc-pan"></div><button class="btn btn-primary" style="width:100%" onclick="submitKYC()">Submit Verification</button></div>`; return; }
             if(d.kycStatus === 'pending') { div.innerHTML = `<div style="text-align:center;padding:40px;"><span class="material-icons-round" style="font-size:48px;color:orange">admin_panel_settings</span><h3>Verification In Progress</h3></div>`; return; }
