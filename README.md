@@ -21,7 +21,7 @@
     <img src="https://img.shields.io/badge/🌐_Visit-Website-202124?style=for-the-badge&logo=google-chrome&logoColor=white" height="50" />
   </a>
   &nbsp;&nbsp;
-  <a href="https://wa.me/919564287717" target="_blank">
+  <a href="https://wa.me/91" target="_blank">
     <img src="https://img.shields.io/badge/Developer-Support-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" height="50" />
   </a>
 
