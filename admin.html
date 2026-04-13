@@ -3,122 +3,684 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RikiApp Admin</title>
+    <title>RikiApp Admin Panel</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
-        :root { --primary: #1e293b; --accent: #3b82f6; --bg: #f1f5f9; }
-        * { box-sizing: border-box; }
-        body { font-family: 'Roboto', sans-serif; margin: 0; background: var(--bg); display: flex; height: 100vh; overflow: hidden; }
+        :root {
+            --primary: #0f172a;
+            --accent: #00875F;
+            --accent-light: #00A86B;
+            --bg: #f1f5f9;
+            --surface: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
         
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        /* Login Overlay */
         #login-overlay { 
-            position: fixed; top:0; left:0; width:100%; height:100%; 
-            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); 
-            z-index:999; display:flex; justify-content:center; align-items:center; flex-direction:column; padding: 20px; 
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            z-index: 999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 20px;
         }
+        
         .login-box { 
-            background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); 
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            padding:30px; border-radius:20px; width:100%; max-width: 350px; text-align:center; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); color: white;
+            padding: 30px;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 350px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            color: white;
         }
+        
         .login-input { 
-            width:100%; padding:12px; margin:8px 0; border:1px solid rgba(255,255,255,0.3); border-radius:8px; 
-            background: rgba(0,0,0,0.2); color: white; outline: none; 
+            width: 100%;
+            padding: 14px;
+            margin: 8px 0;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 12px;
+            background: rgba(0,0,0,0.2);
+            color: white;
+            outline: none;
+            font-size: 14px;
         }
+        
         .login-input::placeholder { color: rgba(255,255,255,0.7); }
         
-        aside { width:260px; background:var(--primary); color:white; display:flex; flex-direction:column; flex-shrink: 0; transition: 0.3s; }
-        .brand { padding:20px; font-size:20px; font-weight:bold; border-bottom:1px solid #334155; display: flex; align-items: center; }
-        .menu-item { padding:16px 20px; cursor:pointer; color:#cbd5e0; display:flex; align-items:center; transition: 0.2s; }
-        .menu-item:hover, .menu-item.active { background:#334155; color:white; border-left: 4px solid var(--accent); }
+        /* Sidebar */
+        aside {
+            width: 280px;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            transition: 0.3s;
+        }
         
-        main { flex:1; padding:30px; overflow-y:auto; position: relative; }
-        .card { background:white; padding:20px; border-radius:12px; margin-bottom:20px; box-shadow:0 2px 5px rgba(0,0,0,0.05); }
+        .brand {
+            padding: 24px 20px;
+            font-size: 20px;
+            font-weight: 700;
+            border-bottom: 1px solid #334155;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
         
-        .upload-form { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .form-group { display: flex; flex-direction: column; }
-        .form-group label { font-size: 12px; color: #64748b; margin-bottom: 5px; font-weight: 500; }
-        .form-input, select { padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; background: white; }
-        .full-width { grid-column: span 2; }
+        .menu-item {
+            padding: 14px 20px;
+            cursor: pointer;
+            color: #cbd5e0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: 0.2s;
+            font-size: 14px;
+            font-weight: 500;
+        }
         
-        .table-responsive { overflow-x: auto; border-radius: 8px; border: 1px solid #e2e8f0; }
-        table { width:100%; border-collapse:collapse; white-space: nowrap; }
-        th, td { padding:14px; text-align:left; border-bottom:1px solid #eee; }
+        .menu-item:hover, .menu-item.active {
+            background: #1e293b;
+            color: white;
+            border-left: 3px solid var(--accent);
+        }
         
-        .btn { padding:8px 16px; border:none; border-radius:6px; cursor:pointer; color:white; font-size:13px; font-weight: 500; transition: 0.2s; }
-        .btn-green { background:#10b981; } .btn-blue { background:#3b82f6; } .btn-red { background:#ef4444; }
-        .multi-preview { display: flex; gap: 8px; overflow-x: auto; margin-top: 5px; }
-        .multi-preview img { height: 60px; border-radius: 4px; border: 1px solid #eee; }
-        .kyc-details { font-size: 13px; color: #444; line-height: 1.6; }
-        .error-msg { color: #ff6b6b; font-size: 13px; margin-top: 10px; display: none; }
-
-        @media (max-width: 768px) { body { flex-direction: column; height: 100vh; } aside { width: 100%; height: auto; flex-direction: row; overflow-x: auto; align-items: center; padding: 0 10px; } .brand span { display: none; } main { padding: 15px; padding-bottom: 80px; } .upload-form { grid-template-columns: 1fr; gap: 10px; } .full-width { grid-column: span 1; } }
+        /* Main Content */
+        main {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+        }
+        
+        .card {
+            background: var(--surface);
+            padding: 24px;
+            border-radius: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--accent);
+        }
+        
+        h2 {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+        }
+        
+        h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+        
+        /* Form Styles */
+        .upload-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        
+        .form-input, select, textarea {
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            outline: none;
+            background: var(--surface);
+            font-size: 14px;
+            transition: 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .form-input:focus, select:focus, textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(0,135,95,0.1);
+        }
+        
+        .full-width {
+            grid-column: span 2;
+        }
+        
+        /* Radio Group */
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 8px;
+        }
+        
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        
+        .radio-option input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--accent);
+        }
+        
+        /* Table */
+        .table-responsive {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 12px;
+            transition: 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .btn-green { background: var(--accent); color: white; }
+        .btn-green:hover { background: var(--accent-light); }
+        .btn-blue { background: #3b82f6; color: white; }
+        .btn-red { background: var(--danger); color: white; }
+        .btn-yellow { background: var(--warning); color: white; }
+        
+        /* Preview */
+        .multi-preview {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+        
+        .multi-preview img {
+            height: 60px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        .status-pending { background: #fef3c7; color: #d97706; }
+        .status-approved { background: #d1fae5; color: #059669; }
+        .status-rejected { background: #fee2e2; color: #dc2626; }
+        
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.2s;
+        }
+        
+        .modal-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .modal-card {
+            background: var(--surface);
+            border-radius: 24px;
+            padding: 24px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            transform: scale(0.95);
+            animation: modalPop 0.2s ease forwards;
+        }
+        
+        @keyframes modalPop {
+            to { transform: scale(1); }
+        }
+        
+        .error-msg {
+            color: var(--danger);
+            font-size: 12px;
+            margin-top: 8px;
+            display: none;
+        }
+        
+        .success-msg {
+            color: var(--success);
+            font-size: 12px;
+            margin-top: 8px;
+            display: none;
+        }
+        
+        .notification-badge {
+            background: var(--danger);
+            color: white;
+            border-radius: 20px;
+            padding: 2px 8px;
+            font-size: 10px;
+            margin-left: 8px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+                height: 100vh;
+            }
+            aside {
+                width: 100%;
+                height: auto;
+                flex-direction: row;
+                overflow-x: auto;
+                padding: 8px 12px;
+            }
+            .brand span:first-child { display: none; }
+            .menu-item span:first-child { margin-right: 0; }
+            .menu-item span:last-child { display: none; }
+            main { padding: 16px; }
+            .upload-form { grid-template-columns: 1fr; }
+            .full-width { grid-column: span 1; }
+        }
     </style>
 </head>
 <body>
 
+<!-- Login Overlay -->
 <div id="login-overlay">
     <div class="login-box">
-        <h3>RikiApp Admin</h3>
-        <p style="font-size:12px; opacity:0.8; margin-bottom:20px;">Secure Panel Access</p>
+        <span class="material-icons-round" style="font-size: 48px; margin-bottom: 16px;">admin_panel_settings</span>
+        <h3>RikiApp Admin Panel</h3>
+        <p style="font-size: 12px; opacity: 0.8; margin-bottom: 24px;">Secure Admin Access Only</p>
         <input type="email" id="adm-email" class="login-input" placeholder="admin@email.com">
         <input type="password" id="adm-pass" class="login-input" placeholder="Password">
-        <button class="btn btn-green" style="width:100%; padding:12px; margin-top:10px;" onclick="doLogin()">Login</button>
+        <button class="btn btn-green" style="width:100%; padding:12px; margin-top:12px;" onclick="doLogin()">Login</button>
         <p id="login-msg" class="error-msg"></p>
     </div>
 </div>
 
+<!-- Sidebar -->
 <aside>
-    <div class="brand"><span class="material-icons-round" style="margin-right:8px; color:#34d399">admin_panel_settings</span>Admin</div>
-    <div class="menu-item active" onclick="tab('pay')">Approvals</div>
-    <div class="menu-item" onclick="tab('kyc')">KYC Verify</div>
-    <div class="menu-item" onclick="tab('wd')">Withdrawals</div>
-    <div class="menu-item" onclick="tab('apps')">App Manager</div>
-    <div class="menu-item" onclick="firebase.auth().signOut()">Logout</div>
+    <div class="brand">
+        <span class="material-icons-round" style="color: var(--accent);">storefront</span>
+        <span>RikiApp Admin</span>
+    </div>
+    <div class="menu-item active" onclick="tab('pending')">
+        <span class="material-icons-round">pending_actions</span>
+        <span>Pending Apps</span>
+        <span id="pending-count" class="notification-badge" style="display: none;">0</span>
+    </div>
+    <div class="menu-item" onclick="tab('wd')">
+        <span class="material-icons-round">account_balance_wallet</span>
+        <span>Withdrawals</span>
+        <span id="wd-count" class="notification-badge" style="display: none;">0</span>
+    </div>
+    <div class="menu-item" onclick="tab('apps')">
+        <span class="material-icons-round">apps</span>
+        <span>App Manager</span>
+    </div>
+    <div class="menu-item" onclick="tab('upload')">
+        <span class="material-icons-round">cloud_upload</span>
+        <span>Upload App</span>
+    </div>
+    <div class="menu-item" onclick="tab('notifications')">
+        <span class="material-icons-round">notifications</span>
+        <span>Send Notification</span>
+    </div>
+    <div class="menu-item" onclick="logout()">
+        <span class="material-icons-round">logout</span>
+        <span>Logout</span>
+    </div>
 </aside>
 
+<!-- Main Content -->
 <main>
-    <div id="tab-pay">
-        <h2>Payment Requests (₹299)</h2>
-        <div class="card"><div class="table-responsive"><table><thead><tr><th>UID</th><th>UTR</th><th>Proof</th><th>Action</th></tr></thead><tbody id="tbl-pay"></tbody></table></div></div>
-    </div>
-    <div id="tab-kyc" style="display:none">
-        <h2>KYC Verification Requests</h2>
-        <div class="card"><div class="table-responsive"><table><thead><tr><th>Developer</th><th>Documents</th><th>Type</th><th>Action</th></tr></thead><tbody id="tbl-kyc"></tbody></table></div></div>
-    </div>
-    <div id="tab-wd" style="display:none">
-        <h2>Withdrawal Requests</h2>
-        <div class="card"><div class="table-responsive"><table><thead><tr><th>UID</th><th>Amount</th><th>Method</th><th>Details</th><th>Status</th><th>Action</th></tr></thead><tbody id="tbl-wd"></tbody></table></div></div>
-    </div>
-    <div id="tab-apps" style="display:none">
-        <div class="card" style="border-top: 4px solid var(--accent);">
-            <h3 style="margin-top:0; color:var(--accent)">Upload App / Link</h3>
-            <div class="upload-form">
-                <div class="form-group"><label>App Name</label><input type="text" id="up-name" class="form-input"></div>
-                <div class="form-group"><label>Type</label><select id="up-type" onchange="updateAdminCategories()"><option value="App">App</option><option value="Game">Game</option></select></div>
-                <div class="form-group"><label>Category</label><select id="up-cat"></select></div>
-                <div class="form-group"><label>Version</label><input type="text" id="up-ver" class="form-input"></div>
-                <div class="form-group full-width"><label>Download Link</label><input type="url" id="up-url" class="form-input"></div>
-                <div class="form-group full-width"><label>Privacy Policy</label><input type="url" id="up-policy" class="form-input"></div>
-                <div class="form-group full-width"><label>Description</label><input type="text" id="up-desc" class="form-input"></div>
-                <div class="form-group"><label>Icon</label><input type="file" id="up-icon" class="form-input" accept="image/*"></div>
-                <div class="form-group"><label>Screenshots (Min 2)</label><input type="file" id="up-screens" class="form-input" multiple accept="image/*" onchange="previewAdminImgs(this)"><div id="admin-preview" class="multi-preview"></div></div>
+    <!-- Tab: Pending Apps -->
+    <div id="tab-pending">
+        <div class="card">
+            <div class="card-header">
+                <h2>📱 Pending App Submissions</h2>
+                <span class="status-badge status-pending">Waiting for review</span>
             </div>
-            <button class="btn btn-blue" style="margin-top:20px;" onclick="adminUpload()">Publish App</button>
-            <span id="up-status" style="margin-left:15px; font-size:14px; font-weight:500;"></span>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr><th>Icon</th><th>App Name</th><th>Developer</th><th>Category</th><th>Version</th><th>Status</th><th>Action</th></tr>
+                    </thead>
+                    <tbody id="tbl-pending"></tbody>
+                </table>
+            </div>
         </div>
-        <h2>Published Apps</h2>
-        <div class="card"><div class="table-responsive"><table><thead><tr><th>Icon</th><th>Name</th><th>Type</th><th>DLs</th><th>Status</th><th>Action</th></tr></thead><tbody id="tbl-apps"></tbody></table></div></div>
+    </div>
+    
+    <!-- Tab: Withdrawals -->
+    <div id="tab-wd" style="display:none">
+        <div class="card">
+            <div class="card-header">
+                <h2>💰 Withdrawal Requests</h2>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr><th>Developer</th><th>Amount</th><th>Method</th><th>Details</th><th>Status</th><th>Action</th></tr>
+                    </thead>
+                    <tbody id="tbl-wd"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tab: App Manager (All Apps) -->
+    <div id="tab-apps" style="display:none">
+        <div class="card">
+            <div class="card-header">
+                <h2>📦 All Apps</h2>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr><th>Icon</th><th>Name</th><th>Developer</th><th>Downloads</th><th>Status</th><th>Action</th></tr>
+                    </thead>
+                    <tbody id="tbl-apps"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tab: Upload App (Admin Direct) -->
+    <div id="tab-upload" style="display:none">
+        <div class="card">
+            <div class="card-header">
+                <h2>🚀 Admin: Upload New App</h2>
+            </div>
+            
+            <div class="form-group full-width">
+                <label>Upload Method</label>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="upload-type" value="apk" checked onchange="toggleUploadMethod()">
+                        <span>📱 Upload APK File</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="upload-type" value="link" onchange="toggleUploadMethod()">
+                        <span>🔗 Direct Download Link</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="upload-form">
+                <div class="form-group full-width">
+                    <label>App Name *</label>
+                    <input type="text" id="up-name" class="form-input" placeholder="Enter app name">
+                </div>
+                
+                <div class="form-group">
+                    <label>Type</label>
+                    <select id="up-type" onchange="updateAdminCategories()">
+                        <option value="App">App</option>
+                        <option value="Game">Game</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="up-cat"></select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Version</label>
+                    <input type="text" id="up-ver" class="form-input" placeholder="1.0.0">
+                </div>
+                
+                <div class="form-group">
+                    <label>Short Description</label>
+                    <input type="text" id="up-short-desc" class="form-input" placeholder="Brief description">
+                </div>
+                
+                <div class="form-group full-width">
+                    <label>Full Description</label>
+                    <textarea id="up-desc" rows="3" class="form-input" placeholder="Detailed description..."></textarea>
+                </div>
+                
+                <div class="form-group full-width">
+                    <label>Privacy Policy URL</label>
+                    <input type="url" id="up-policy" class="form-input" placeholder="https://...">
+                </div>
+                
+                <div id="apk-upload-section" class="form-group full-width">
+                    <label>APK File (.apk) *</label>
+                    <input type="file" id="up-apk" class="form-input" accept=".apk">
+                    <div id="apk-error" class="error-msg">❌ Only .apk files are allowed!</div>
+                    <div id="apk-uploading" style="display: none; font-size: 12px; color: var(--accent); margin-top: 5px;">Uploading to Gofile...</div>
+                    <input type="hidden" id="apk-url">
+                </div>
+                
+                <div id="link-upload-section" class="form-group full-width" style="display: none;">
+                    <label>Direct Download URL *</label>
+                    <input type="url" id="up-link" class="form-input" placeholder="https://example.com/app.apk">
+                </div>
+                
+                <div class="form-group">
+                    <label>App Icon *</label>
+                    <input type="file" id="up-icon" class="form-input" accept="image/*">
+                </div>
+                
+                <div class="form-group">
+                    <label>Screenshots (Min 2) *</label>
+                    <input type="file" id="up-screens" class="form-input" multiple accept="image/*" onchange="previewAdminImgs(this)">
+                    <div id="admin-preview" class="multi-preview"></div>
+                </div>
+            </div>
+            
+            <button class="btn btn-green" style="margin-top: 24px; padding: 12px 24px;" onclick="adminUpload()">
+                <span class="material-icons-round" style="vertical-align: middle;">publish</span> Publish App
+            </button>
+            <span id="up-status" style="margin-left: 16px; font-size: 13px; font-weight: 500;"></span>
+        </div>
+    </div>
+    
+    <!-- Tab: Send Notification -->
+    <div id="tab-notifications" style="display:none">
+        <div class="card">
+            <div class="card-header">
+                <h2>📨 Send Notification to Developer</h2>
+            </div>
+            
+            <div class="form-group full-width">
+                <label>Select Developer</label>
+                <select id="notify-user" class="form-input">
+                    <option value="">-- Select Developer --</option>
+                </select>
+            </div>
+            
+            <div class="form-group full-width">
+                <label>Subject</label>
+                <input type="text" id="notify-subject" class="form-input" placeholder="e.g., App Update Required">
+            </div>
+            
+            <div class="form-group full-width">
+                <label>Message</label>
+                <textarea id="notify-message" rows="4" class="form-input" placeholder="Write your message here..."></textarea>
+            </div>
+            
+            <button class="btn btn-blue" onclick="sendNotification()">
+                <span class="material-icons-round" style="vertical-align: middle;">send</span> Send Notification
+            </button>
+            <div id="notify-status" class="success-msg" style="display: none;"></div>
+        </div>
+        
+        <!-- Notification History -->
+        <div class="card">
+            <div class="card-header">
+                <h2>📜 Notification History</h2>
+            </div>
+            <div id="notifications-list" class="table-responsive">
+                <table>
+                    <thead>
+                        <tr><th>To</th><th>Subject</th><th>Message</th><th>Date</th><th>Status</th></tr>
+                    </thead>
+                    <tbody id="tbl-notifications"></tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </main>
+
+<!-- Edit App Modal -->
+<div id="edit-modal" class="modal-overlay">
+    <div class="modal-card">
+        <h3 style="margin-bottom: 20px;">✏️ Edit App</h3>
+        <input type="hidden" id="edit-app-id">
+        
+        <div class="form-group full-width">
+            <label>App Name</label>
+            <input type="text" id="edit-name" class="form-input">
+        </div>
+        
+        <div class="form-group full-width">
+            <label>Category</label>
+            <select id="edit-cat" class="form-input"></select>
+        </div>
+        
+        <div class="form-group full-width">
+            <label>Short Description</label>
+            <input type="text" id="edit-short-desc" class="form-input">
+        </div>
+        
+        <div class="form-group full-width">
+            <label>Full Description</label>
+            <textarea id="edit-desc" rows="3" class="form-input"></textarea>
+        </div>
+        
+        <div class="form-group full-width">
+            <label>Version</label>
+            <input type="text" id="edit-version" class="form-input">
+        </div>
+        
+        <div class="form-group full-width">
+            <label>Privacy Policy URL</label>
+            <input type="url" id="edit-policy" class="form-input">
+        </div>
+        
+        <div class="form-group full-width">
+            <label>Download URL / APK Link</label>
+            <input type="url" id="edit-url" class="form-input" placeholder="https://...">
+        </div>
+        
+        <div class="form-group full-width">
+            <label>Status</label>
+            <select id="edit-status" class="form-input">
+                <option value="published">Published</option>
+                <option value="pending">Pending</option>
+                <option value="rejected">Rejected</option>
+            </select>
+        </div>
+        
+        <div class="form-group full-width">
+            <label>Reason for Rejection/Update (send to developer)</label>
+            <textarea id="edit-reason" rows="2" class="form-input" placeholder="Enter reason why update is needed..."></textarea>
+        </div>
+        
+        <div style="display: flex; gap: 12px; margin-top: 20px;">
+            <button class="btn btn-green" onclick="saveAppEdit()">💾 Save Changes</button>
+            <button class="btn btn-red" onclick="closeEditModal()">Cancel</button>
+        </div>
+        <div id="edit-status-msg" class="error-msg"></div>
+    </div>
+</div>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
+    // ==================== FIREBASE CONFIG ====================
     const firebaseConfig = {
         apiKey: "AIzaSyBpK2TQhhdtm9eEGN8TEE6WTW3natf47OA",
         authDomain: "rikiapp-c3b21.firebaseapp.com",
@@ -128,93 +690,642 @@
         messagingSenderId: "947081687732",
         appId: "1:947081687732:web:3808455f70e06e95869de1"
     };
+    
     const IMGBB_KEY = "07806a9e0f6db8a56403fcc0c909b163";
-
+    const GOFILE_TOKEN = "XX25iDe9RGA3qpcN3oynra4ZSgY7q9ls";
+    const SUPPORT_EMAIL = "nitai.grp00@gmail.com";
+    
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     const auth = firebase.auth();
-
-    const categories = { "App": ["Art & Design", "Business", "Education", "Entertainment", "Finance", "Health", "Lifestyle", "Music", "Photography", "Productivity", "Social", "Tools", "Video Players", "Weather"], "Game": ["Action", "Adventure", "Arcade", "Board", "Card", "Puzzle", "Racing", "RPG", "Simulation", "Sports", "Strategy"] };
-
-    // --- SECURE LOGIN LOGIC ---
-    auth.onAuthStateChanged(user => {
+    
+    // Categories
+    const categories = {
+        "App": ["Art & Design", "Business", "Education", "Entertainment", "Finance", "Health", "Lifestyle", "Music", "Photography", "Productivity", "Social", "Tools", "Video Players", "Weather"],
+        "Game": ["Action", "Adventure", "Arcade", "Board", "Card", "Puzzle", "Racing", "RPG", "Simulation", "Sports", "Strategy"]
+    };
+    
+    // ==================== AUTH & LOGIN ====================
+    auth.onAuthStateChanged(async (user) => {
         if(user) {
-            // Check Database for Admin Role
-            db.ref('users/' + user.uid).once('value').then(snap => {
-                const data = snap.val();
-                if(data && data.role === 'admin') {
-                    document.getElementById('login-overlay').style.display = 'none';
-                    updateAdminCategories();
-                } else {
-                    // Not Admin -> Kick Out
-                    auth.signOut();
-                    const msg = document.getElementById('login-msg');
-                    msg.innerText = "Access Denied: You do not have Admin privileges.";
-                    msg.style.display = 'block';
-                    document.getElementById('login-overlay').style.display = 'flex';
-                }
-            });
+            const snap = await db.ref('users/' + user.uid).once('value');
+            const data = snap.val();
+            if(data && data.role === 'admin') {
+                document.getElementById('login-overlay').style.display = 'none';
+                updateAdminCategories();
+                loadPendingApps();
+                loadWithdrawals();
+                loadAllApps();
+                loadDevelopersForNotification();
+                loadNotificationHistory();
+            } else {
+                auth.signOut();
+                const msg = document.getElementById('login-msg');
+                msg.innerText = "Access Denied: Admin privileges required.";
+                msg.style.display = 'block';
+            }
         } else {
             document.getElementById('login-overlay').style.display = 'flex';
         }
     });
-
-    function doLogin() { 
-        const e = document.getElementById('adm-email').value;
-        const p = document.getElementById('adm-pass').value;
-        if(!e || !p) return;
-        document.getElementById('login-msg').innerText = "Verifying credentials...";
+    
+    function doLogin() {
+        const email = document.getElementById('adm-email').value;
+        const pass = document.getElementById('adm-pass').value;
+        if(!email || !pass) return;
+        document.getElementById('login-msg').innerText = "Verifying...";
         document.getElementById('login-msg').style.display = 'block';
-        auth.signInWithEmailAndPassword(e, p).catch(err => {
+        auth.signInWithEmailAndPassword(email, pass).catch(err => {
             document.getElementById('login-msg').innerText = err.message;
-        }); 
+        });
     }
-
-    function tab(name) { document.querySelectorAll('[id^="tab-"]').forEach(el => el.style.display = 'none'); document.getElementById('tab-'+name).style.display = 'block'; }
-    window.updateAdminCategories = () => { const type = document.getElementById('up-type').value; const catSelect = document.getElementById('up-cat'); catSelect.innerHTML = ""; categories[type].forEach(c => { const opt = document.createElement('option'); opt.value = c; opt.innerText = c; catSelect.appendChild(opt); }); }
-
-    db.ref('paymentRequests').on('value', snap => { const t = document.getElementById('tbl-pay'); t.innerHTML = ''; snap.forEach(c => { const d = c.val(); if(d.status === 'pending') t.innerHTML += `<tr><td>${d.uid}</td><td>${d.txnId}</td><td><a href="${d.screenshot}" target="_blank">View</a></td><td><button class="btn btn-green" onclick="approvePayment('${c.key}','${d.uid}')">Approve Payment</button></td></tr>`; }); });
-    function approvePayment(key, uid) { db.ref('paymentRequests/'+key).update({status:'approved'}); db.ref('developers/'+uid).update({paymentStatus:'approved'}); }
-
-    db.ref('kycData').on('value', snap => { const t = document.getElementById('tbl-kyc'); t.innerHTML = ''; snap.forEach(c => { const d = c.val(); db.ref('developers/'+c.key).once('value', devSnap => { const dev = devSnap.val(); if(dev && dev.kycStatus === 'pending') { t.innerHTML += `<tr><td><b>${d.legalName}</b><br>${d.email}</td><td><div class="kyc-details">Aadhar: ${d.aadhar}<br>PAN: ${d.pan}<br>Mobile: ${d.mobile}<br>Addr: ${d.address}</div></td><td>${d.accType}</td><td><button class="btn btn-green" onclick="approveKYC('${c.key}')">Unlock Account</button></td></tr>`; } }); }); });
-    function approveKYC(uid) { if(!confirm("Documents Verified? Unlock Account?")) return; db.ref('developers/'+uid).update({kycStatus:'approved', lifetimePaid:true}); }
-
-    db.ref('withdrawals').on('value', snap => { const t = document.getElementById('tbl-wd'); t.innerHTML = ''; snap.forEach(c => { const d = c.val(); if(d.status === 'pending') { t.innerHTML += `<tr><td>${d.uid.substr(0,8)}</td><td><b>₹${d.amount}</b></td><td>${d.method}</td><td><div class="wd-details">${d.details}</div></td><td style="color:orange">${d.status}</td><td><button class="btn btn-green" onclick="approveWD('${c.key}','${d.uid}', ${d.amount})">Pay</button></td></tr>`; } }); });
-    function approveWD(key, uid, amount) { if(!confirm(`Confirm payment of ₹${amount}?`)) return; db.ref('withdrawals/'+key).update({status:'approved'}); db.ref('developers/'+uid+'/paidOut').transaction(current => (current || 0) + amount); }
-
-    db.ref('apps').on('value', snap => { const t = document.getElementById('tbl-apps'); t.innerHTML = ''; snap.forEach(c => { const a = c.val(); t.innerHTML += `<tr><td><img src="${a.icon}" width="32"></td><td>${a.name}</td><td>${a.type}</td><td>${a.downloads||0}</td><td>${a.status}</td><td>${a.status!=='published' ? `<button class="btn btn-green" onclick="setSt('${c.key}','published')">✓</button>` : ''}<button class="btn btn-red" onclick="setSt('${c.key}','rejected')">✕</button></td></tr>`; }); });
-    function setSt(k, s) { db.ref('apps/'+k).update({status:s}); }
-
-    window.previewAdminImgs = (input) => { const c = document.getElementById('admin-preview'); c.innerHTML=''; for(let i=0; i<Math.min(input.files.length, 8); i++){ const r = new FileReader(); r.onload = e => { const img=document.createElement('img'); img.src=e.target.result; c.appendChild(img); }; r.readAsDataURL(input.files[i]); } }
-
-    async function adminUpload() {
-        const status = document.getElementById('up-status'); const btn = document.querySelector('.btn-blue');
-        const name = document.getElementById('up-name').value; const url = document.getElementById('up-url').value; const policy = document.getElementById('up-policy').value;
-        const iconFile = document.getElementById('up-icon').files[0]; const screenFiles = document.getElementById('up-screens').files;
-        const type = document.getElementById('up-type').value; const cat = document.getElementById('up-cat').value;
-
-        if(!name || !url || !iconFile) return alert("Fill required fields"); if(screenFiles.length < 2) return alert("Min 2 screenshots");
-        btn.disabled = true; status.innerText = "Uploading..."; status.style.color = "orange";
-
-        try {
-            const upImg = async (f) => { const fd = new FormData(); fd.append("image", f); const r = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {method:'POST', body:fd}); const j=await r.json(); return j.data.url; };
-            const iUrl = await upImg(iconFile);
-            const sUrls = []; for(let i=0; i<screenFiles.length; i++) sUrls.push(await upImg(screenFiles[i]));
-
-            status.innerText = "Publishing...";
-            await db.ref('apps').push({
-                name: name, type: type, category: cat, privacyPolicy: policy,
-                version: document.getElementById('up-ver').value || '1.0', description: document.getElementById('up-desc').value || '',
-                downloadUrl: url, icon: iUrl, screenshots: sUrls,
-                ownerUid: 'ADMIN', devName: 'RikiApp Official', devEmail: 'admin@rikiapp.com',
-                status: 'published', timestamp: Date.now(), downloads: 0
+    
+    function logout() {
+        auth.signOut();
+    }
+    
+    // ==================== TAB NAVIGATION ====================
+    function tab(name) {
+        document.querySelectorAll('[id^="tab-"]').forEach(el => el.style.display = 'none');
+        document.getElementById('tab-'+name).style.display = 'block';
+        document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+        event.target.closest('.menu-item').classList.add('active');
+        
+        if(name === 'pending') loadPendingApps();
+        if(name === 'wd') loadWithdrawals();
+        if(name === 'apps') loadAllApps();
+        if(name === 'notifications') {
+            loadDevelopersForNotification();
+            loadNotificationHistory();
+        }
+    }
+    
+    // ==================== UPLOAD METHOD TOGGLE ====================
+    function toggleUploadMethod() {
+        const method = document.querySelector('input[name="upload-type"]:checked').value;
+        const apkSection = document.getElementById('apk-upload-section');
+        const linkSection = document.getElementById('link-upload-section');
+        
+        if(method === 'apk') {
+            apkSection.style.display = 'block';
+            linkSection.style.display = 'none';
+        } else {
+            apkSection.style.display = 'none';
+            linkSection.style.display = 'block';
+        }
+    }
+    
+    // ==================== UPDATE CATEGORIES ====================
+    function updateAdminCategories() {
+        const type = document.getElementById('up-type').value;
+        const catSelect = document.getElementById('up-cat');
+        catSelect.innerHTML = "";
+        categories[type].forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c;
+            opt.innerText = c;
+            catSelect.appendChild(opt);
+        });
+    }
+    
+    // ==================== LOAD PENDING APPS ====================
+    function loadPendingApps() {
+        db.ref('apps').orderByChild('status').equalTo('pending').on('value', (snap) => {
+            const tbody = document.getElementById('tbl-pending');
+            tbody.innerHTML = '';
+            let count = 0;
+            
+            snap.forEach(child => {
+                const app = child.val();
+                count++;
+                tbody.innerHTML += `
+                    <tr>
+                        <td><img src="${app.icon || 'https://via.placeholder.com/40'}" width="40" style="border-radius: 8px;"></td>
+                        <td><strong>${escapeHtml(app.name)}</strong></td>
+                        <td>${escapeHtml(app.devName || app.devEmail || 'Unknown')}</td>
+                        <td>${app.category || '-'}</td>
+                        <td>${app.version || '1.0'}</td>
+                        <td><span class="status-badge status-pending">pending</span></td>
+                        <td>
+                            <button class="btn btn-green" onclick="openEditModal('${child.key}')" style="margin-right: 5px;">✏️ Edit</button>
+                            <button class="btn btn-green" onclick="approveApp('${child.key}')" style="margin-right: 5px;">✓ Approve</button>
+                            <button class="btn btn-red" onclick="rejectApp('${child.key}')">✗ Reject</button>
+                        </td>
+                    </tr>
+                `;
             });
-
-            status.innerText = "Success!"; status.style.color = "green";
-            document.querySelectorAll('.upload-form input').forEach(i => i.value = ''); document.getElementById('admin-preview').innerHTML = '';
-        } catch(e) { status.innerText = "Error: " + e.message; status.style.color = "red"; }
-        btn.disabled = false;
+            
+            const pendingCount = document.getElementById('pending-count');
+            if(count > 0) {
+                pendingCount.style.display = 'inline-block';
+                pendingCount.innerText = count;
+            } else {
+                pendingCount.style.display = 'none';
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No pending apps</td></tr>';
+            }
+        });
     }
+    
+    function approveApp(appId) {
+        if(!confirm('Approve this app? It will be published immediately.')) return;
+        db.ref('apps/' + appId).update({ status: 'published', approvedAt: Date.now() });
+        sendAutoNotification(appId, 'approved', '');
+        alert('App approved and published!');
+    }
+    
+    function rejectApp(appId) {
+        const reason = prompt('Enter reason for rejection (will be sent to developer):');
+        if(reason === null) return;
+        if(!reason.trim()) {
+            alert('Please enter a reason for rejection');
+            return;
+        }
+        db.ref('apps/' + appId).update({ status: 'rejected' });
+        sendAutoNotification(appId, 'rejected', reason);
+        alert('App rejected. Notification sent to developer.');
+    }
+    
+    // ==================== OPEN EDIT MODAL ====================
+    function openEditModal(appId) {
+        db.ref('apps/' + appId).once('value', (snap) => {
+            const app = snap.val();
+            if(!app) return;
+            
+            document.getElementById('edit-app-id').value = appId;
+            document.getElementById('edit-name').value = app.name || '';
+            document.getElementById('edit-cat').innerHTML = '';
+            
+            // Populate categories
+            const cats = app.type === 'Game' ? categories.Game : categories.App;
+            cats.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c;
+                opt.innerText = c;
+                if(app.category === c) opt.selected = true;
+                document.getElementById('edit-cat').appendChild(opt);
+            });
+            
+            document.getElementById('edit-short-desc').value = app.shortDesc || '';
+            document.getElementById('edit-desc').value = app.description || '';
+            document.getElementById('edit-version').value = app.version || '';
+            document.getElementById('edit-policy').value = app.privacyPolicy || '';
+            document.getElementById('edit-url').value = app.apkUrl || '';
+            document.getElementById('edit-status').value = app.status || 'pending';
+            document.getElementById('edit-reason').value = '';
+            
+            document.getElementById('edit-modal').classList.add('show');
+        });
+    }
+    
+    function closeEditModal() {
+        document.getElementById('edit-modal').classList.remove('show');
+    }
+    
+    async function saveAppEdit() {
+        const appId = document.getElementById('edit-app-id').value;
+        const name = document.getElementById('edit-name').value;
+        const category = document.getElementById('edit-cat').value;
+        const shortDesc = document.getElementById('edit-short-desc').value;
+        const description = document.getElementById('edit-desc').value;
+        const version = document.getElementById('edit-version').value;
+        const policy = document.getElementById('edit-policy').value;
+        const url = document.getElementById('edit-url').value;
+        const status = document.getElementById('edit-status').value;
+        const reason = document.getElementById('edit-reason').value;
+        
+        if(!name) {
+            document.getElementById('edit-status-msg').innerText = 'App name required';
+            return;
+        }
+        
+        const updates = {
+            name, category, shortDesc, description, version,
+            privacyPolicy: policy, apkUrl: url, status
+        };
+        
+        await db.ref('apps/' + appId).update(updates);
+        
+        // Send notification if reason provided
+        if(reason && reason.trim()) {
+            sendAutoNotification(appId, status, reason);
+        }
+        
+        document.getElementById('edit-status-msg').innerText = 'Saved successfully!';
+        document.getElementById('edit-status-msg').style.color = 'var(--success)';
+        
+        setTimeout(() => {
+            closeEditModal();
+            loadPendingApps();
+            loadAllApps();
+        }, 1000);
+    }
+    
+    // ==================== SEND AUTO NOTIFICATION ====================
+    async function sendAutoNotification(appId, status, reason) {
+        const appSnap = await db.ref('apps/' + appId).once('value');
+        const app = appSnap.val();
+        if(!app || !app.ownerUid) return;
+        
+        let subject = '', message = '';
+        
+        if(status === 'approved') {
+            subject = '✅ App Approved - RikiApp Store';
+            message = `Your app "${app.name}" has been approved and is now live on RikiApp Store. Users can now download your app.`;
+        } else if(status === 'rejected') {
+            subject = '❌ App Rejected - RikiApp Store';
+            message = `Your app "${app.name}" has been rejected.\n\nReason: ${reason}\n\nPlease fix the issues and resubmit your app.\n\nFor support: ${SUPPORT_EMAIL}`;
+        } else {
+            subject = '📝 App Update Required';
+            message = `Your app "${app.name}" needs updates.\n\nReason: ${reason}\n\nPlease update your app and resubmit.\n\nFor support: ${SUPPORT_EMAIL}`;
+        }
+        
+        const notification = {
+            userId: app.ownerUid,
+            appId: appId,
+            appName: app.name,
+            subject: subject,
+            message: message,
+            type: status,
+            read: false,
+            createdAt: Date.now()
+        };
+        
+        await db.ref('notifications/' + app.ownerUid).push(notification);
+    }
+    
+    // ==================== SEND MANUAL NOTIFICATION ====================
+    async function sendNotification() {
+        const userId = document.getElementById('notify-user').value;
+        const subject = document.getElementById('notify-subject').value;
+        const message = document.getElementById('notify-message').value;
+        
+        if(!userId) { alert('Select a developer'); return; }
+        if(!subject) { alert('Enter subject'); return; }
+        if(!message) { alert('Enter message'); return; }
+        
+        const notification = {
+            userId: userId,
+            subject: subject,
+            message: message + `\n\nFor support: ${SUPPORT_EMAIL}`,
+            type: 'manual',
+            read: false,
+            createdAt: Date.now()
+        };
+        
+        await db.ref('notifications/' + userId).push(notification);
+        
+        document.getElementById('notify-status').style.display = 'block';
+        document.getElementById('notify-status').innerText = '✅ Notification sent successfully!';
+        document.getElementById('notify-status').style.color = 'var(--success)';
+        
+        document.getElementById('notify-subject').value = '';
+        document.getElementById('notify-message').value = '';
+        
+        setTimeout(() => {
+            document.getElementById('notify-status').style.display = 'none';
+        }, 3000);
+        
+        loadNotificationHistory();
+    }
+    
+    // ==================== LOAD DEVELOPERS FOR NOTIFICATION ====================
+    function loadDevelopersForNotification() {
+        db.ref('apps').on('value', (snap) => {
+            const developers = new Map();
+            snap.forEach(child => {
+                const app = child.val();
+                if(app.ownerUid && app.ownerUid !== 'ADMIN') {
+                    developers.set(app.ownerUid, {
+                        uid: app.ownerUid,
+                        name: app.devName || app.devEmail || app.ownerUid
+                    });
+                }
+            });
+            
+            const select = document.getElementById('notify-user');
+            select.innerHTML = '<option value="">-- Select Developer --</option>';
+            
+            developers.forEach((dev, uid) => {
+                select.innerHTML += `<option value="${uid}">${escapeHtml(dev.name)}</option>`;
+            });
+        });
+    }
+    
+    // ==================== LOAD NOTIFICATION HISTORY ====================
+    function loadNotificationHistory() {
+        const tbody = document.getElementById('tbl-notifications');
+        if(!tbody) return;
+        
+        // Load recent notifications from all users (last 50)
+        db.ref('notifications').limitToLast(50).on('value', (snap) => {
+            const notifications = [];
+            snap.forEach(userSnap => {
+                userSnap.forEach(notifSnap => {
+                    notifications.push({
+                        id: notifSnap.key,
+                        userId: userSnap.key,
+                        ...notifSnap.val()
+                    });
+                });
+            });
+            
+            notifications.reverse();
+            
+            if(notifications.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No notifications sent yet</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = notifications.slice(0, 30).map(n => `
+                <tr>
+                    <td>${escapeHtml(n.userId?.substring(0, 12) || 'Unknown')}...</td>
+                    <td><strong>${escapeHtml(n.subject || '-')}</strong></td>
+                    <td><small>${escapeHtml(n.message?.substring(0, 60) || '-')}${n.message?.length > 60 ? '...' : ''}</small></td>
+                    <td>${new Date(n.createdAt).toLocaleString()}</td>
+                    <td><span class="status-badge ${n.type === 'approved' ? 'status-approved' : (n.type === 'rejected' ? 'status-rejected' : 'status-pending')}">${n.type || 'sent'}</span></td>
+                </tr>
+            `).join('');
+        });
+    }
+    
+    // ==================== LOAD WITHDRAWALS ====================
+    function loadWithdrawals() {
+        db.ref('withdrawals').orderByChild('status').equalTo('pending').on('value', (snap) => {
+            const tbody = document.getElementById('tbl-wd');
+            tbody.innerHTML = '';
+            let count = 0;
+            
+            snap.forEach(child => {
+                const wd = child.val();
+                count++;
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${wd.uid ? wd.uid.substring(0, 12) + '...' : '-'}</td>
+                        <td><strong>₹${wd.amount}</strong></td>
+                        <td>${wd.method || 'UPI'}</td>
+                        <td><small>${escapeHtml(wd.details || '-')}</small></td>
+                        <td><span class="status-badge status-pending">pending</span></td>
+                        <td>
+                            <button class="btn btn-green" onclick="approveWD('${child.key}', '${wd.uid}', ${wd.amount})">✓ Approve</button>
+                         </td>
+                    </tr>
+                `;
+            });
+            
+            const wdCount = document.getElementById('wd-count');
+            if(count > 0) {
+                wdCount.style.display = 'inline-block';
+                wdCount.innerText = count;
+            } else {
+                wdCount.style.display = 'none';
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No pending withdrawals</td></tr>';
+            }
+        });
+    }
+    
+    function approveWD(key, uid, amount) {
+        if(!confirm(`Confirm payment of ₹${amount}?`)) return;
+        db.ref('withdrawals/' + key).update({ status: 'approved', approvedAt: Date.now() });
+        db.ref('developers/' + uid + '/paidOut').transaction(current => (current || 0) + amount);
+        alert('Withdrawal approved!');
+    }
+    
+    // ==================== LOAD ALL APPS ====================
+    function loadAllApps() {
+        db.ref('apps').on('value', (snap) => {
+            const tbody = document.getElementById('tbl-apps');
+            tbody.innerHTML = '';
+            
+            snap.forEach(child => {
+                const app = child.val();
+                tbody.innerHTML += `
+                    <tr>
+                        <td><img src="${app.icon || 'https://via.placeholder.com/32'}" width="32" style="border-radius: 6px;"></td>
+                        <td><strong>${escapeHtml(app.name)}</strong></td>
+                        <td>${escapeHtml(app.devName || 'Admin')}</td>
+                        <td>${app.downloads || 0}</td>
+                        <td><span class="status-badge ${app.status === 'published' ? 'status-approved' : (app.status === 'pending' ? 'status-pending' : 'status-rejected')}">${app.status || 'pending'}</span></td>
+                        <td>
+                            <button class="btn btn-yellow" onclick="openEditModal('${child.key}')" style="margin-right: 5px;">✏️ Edit</button>
+                            <button class="btn btn-red" onclick="deleteApp('${child.key}')">🗑 Delete</button>
+                         </td>
+                    </tr>
+                `;
+            });
+            
+            if(snap.numChildren() === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No apps found</td></tr>';
+            }
+        });
+    }
+    
+    function deleteApp(appId) {
+        if(!confirm('Delete this app permanently? This action cannot be undone.')) return;
+        db.ref('apps/' + appId).remove();
+        alert('App deleted.');
+    }
+    
+    // ==================== GO FILE APK UPLOAD ====================
+    async function uploadToGofile(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        const uploadingDiv = document.getElementById('apk-uploading');
+        const errorDiv = document.getElementById('apk-error');
+        
+        uploadingDiv.style.display = 'block';
+        errorDiv.style.display = 'none';
+        
+        try {
+            const serverRes = await fetch('https://api.gofile.io/servers');
+            const serverData = await serverRes.json();
+            
+            if(!serverData.data?.servers?.length) throw new Error('No server available');
+            
+            const server = serverData.data.servers[0].name;
+            const uploadUrl = `https://${server}.gofile.io/uploadFile`;
+            
+            const uploadRes = await fetch(uploadUrl, {
+                method: 'POST',
+                body: formData,
+                headers: { 'Authorization': `Bearer ${GOFILE_TOKEN}` }
+            });
+            
+            const result = await uploadRes.json();
+            uploadingDiv.style.display = 'none';
+            
+            if(result.status === 'ok' && result.data?.downloadPage) {
+                return result.data.downloadPage;
+            } else {
+                throw new Error(result.status || 'Upload failed');
+            }
+        } catch(error) {
+            uploadingDiv.style.display = 'none';
+            errorDiv.style.display = 'block';
+            errorDiv.innerText = '❌ Upload failed: ' + error.message;
+            return null;
+        }
+    }
+    
+    // ==================== IMAGE UPLOAD ====================
+    async function uploadToImgBB(file) {
+        const formData = new FormData();
+        formData.append('image', file);
+        
+        try {
+            const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            if(data.success) return data.data.url;
+            throw new Error('Upload failed');
+        } catch(error) {
+            console.error('Upload error:', error);
+            return null;
+        }
+    }
+    
+    // ==================== PREVIEW FUNCTIONS ====================
+    window.previewAdminImgs = (input) => {
+        const container = document.getElementById('admin-preview');
+        container.innerHTML = '';
+        
+        Array.from(input.files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                container.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+        });
+    };
+    
+    // ==================== ADMIN UPLOAD ====================
+    async function adminUpload() {
+        const statusSpan = document.getElementById('up-status');
+        const btn = document.querySelector('#tab-upload .btn-green');
+        
+        const name = document.getElementById('up-name').value;
+        const type = document.getElementById('up-type').value;
+        const category = document.getElementById('up-cat').value;
+        const version = document.getElementById('up-ver').value || '1.0';
+        const shortDesc = document.getElementById('up-short-desc').value;
+        const description = document.getElementById('up-desc').value;
+        const policy = document.getElementById('up-policy').value;
+        const iconFile = document.getElementById('up-icon').files[0];
+        const screenFiles = document.getElementById('up-screens').files;
+        const uploadMethod = document.querySelector('input[name="upload-type"]:checked').value;
+        
+        if(!name) { alert('Enter app name'); return; }
+        if(!iconFile) { alert('Upload app icon'); return; }
+        if(screenFiles.length < 2) { alert('Upload at least 2 screenshots'); return; }
+        
+        let downloadUrl = null;
+        
+        if(uploadMethod === 'apk') {
+            const apkFile = document.getElementById('up-apk').files[0];
+            if(!apkFile) { alert('Select APK file'); return; }
+            if(!apkFile.name.toLowerCase().endsWith('.apk')) {
+                document.getElementById('apk-error').style.display = 'block';
+                return;
+            }
+            document.getElementById('apk-error').style.display = 'none';
+            statusSpan.innerText = "Uploading APK to Gofile...";
+            downloadUrl = await uploadToGofile(apkFile);
+            if(!downloadUrl) { statusSpan.innerText = "APK upload failed!"; return; }
+        } else {
+            downloadUrl = document.getElementById('up-link').value;
+            if(!downloadUrl) { alert('Enter download link'); return; }
+        }
+        
+        statusSpan.innerText = "Uploading images...";
+        
+        try {
+            const iconUrl = await uploadToImgBB(iconFile);
+            if(!iconUrl) throw new Error('Icon upload failed');
+            
+            const screenshotUrls = [];
+            for(let file of screenFiles) {
+                const url = await uploadToImgBB(file);
+                if(url) screenshotUrls.push(url);
+            }
+            if(screenshotUrls.length < 2) throw new Error('Screenshot upload failed');
+            
+            const appData = {
+                name: name,
+                type: type,
+                category: category,
+                shortDesc: shortDesc || description?.substring(0, 60) || '',
+                description: description,
+                version: version,
+                privacyPolicy: policy,
+                apkUrl: downloadUrl,
+                icon: iconUrl,
+                screenshots: screenshotUrls,
+                ownerUid: 'ADMIN',
+                devName: 'RikiApp Official',
+                devEmail: SUPPORT_EMAIL,
+                status: 'published',
+                downloads: 0,
+                avgRating: 0,
+                submittedAt: Date.now(),
+                approvedAt: Date.now()
+            };
+            
+            await db.ref('apps').push(appData);
+            statusSpan.innerText = "✅ App published successfully!";
+            statusSpan.style.color = "#10b981";
+            
+            // Clear form
+            document.getElementById('up-name').value = '';
+            document.getElementById('up-ver').value = '';
+            document.getElementById('up-short-desc').value = '';
+            document.getElementById('up-desc').value = '';
+            document.getElementById('up-policy').value = '';
+            document.getElementById('up-apk').value = '';
+            document.getElementById('up-link').value = '';
+            document.getElementById('up-icon').value = '';
+            document.getElementById('up-screens').value = '';
+            document.getElementById('admin-preview').innerHTML = '';
+            document.getElementById('apk-url').value = '';
+            
+            setTimeout(() => {
+                statusSpan.innerText = '';
+            }, 3000);
+            
+            loadAllApps();
+            
+        } catch(error) {
+            statusSpan.innerText = "Error: " + error.message;
+            statusSpan.style.color = "#ef4444";
+        }
+    }
+    
+    function escapeHtml(str) {
+        if(!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if(m === '&') return '&amp;';
+            if(m === '<') return '&lt;';
+            if(m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    // Initialize
+    updateAdminCategories();
+    
+    // APK file validation
+    document.getElementById('up-apk')?.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if(file && !file.name.toLowerCase().endsWith('.apk')) {
+            document.getElementById('apk-error').style.display = 'block';
+            this.value = '';
+        } else {
+            document.getElementById('apk-error').style.display = 'none';
+        }
+    });
 </script>
 </body>
 </html>

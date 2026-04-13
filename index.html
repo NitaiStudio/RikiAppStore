@@ -3,280 +3,1159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RikiApp Store</title>
-    <!-- PWA Manifest & Meta -->
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#00875F">
-<link rel="apple-touch-icon" href="https://i.ibb.co/GQvPFTYx/file-000000001af07206a38c1562e9852d29.png">
-
-<!-- Service Worker Registration -->
-<script>
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('./sw.js')
-                .then(reg => console.log('PWA Ready', reg))
-                .catch(err => console.log('PWA Error', err));
-        });
-    }
-</script>
+    <title>RikiApp Store - Official Android Store</title>
+    <meta name="description" content="Download latest Android apps & games. Free APK downloads.">
+    <meta name="theme-color" content="#00875F">
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="https://i.ibb.co/GQvPFTYx/file-000000001af07206a38c1562e9852d29.png">
+    
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
         :root {
             --primary: #00875F;
+            --primary-light: #00A86B;
+            --primary-dark: #006644;
             --surface: #ffffff;
-            --background: #f0f3f6;
-            --text-main: #202124;
-            --text-sec: #5f6368;
-            --border: #dadce0;
-            --card-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            --surface-variant: #f8f9fa;
+            --background: #f1f3f7;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-tertiary: #94a3b8;
+            --border: #e2e8f0;
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
+            --ripple: rgba(0,135,95,0.12);
         }
 
         body.dark-mode {
-            --surface: #1e1e1e;
-            --background: #121212;
-            --text-main: #ffffff;
-            --text-sec: #a0a0a0;
-            --border: #333333;
-            --card-shadow: 0 1px 3px rgba(255,255,255,0.05);
+            --primary: #00A86B;
+            --surface: #0f172a;
+            --surface-variant: #1e293b;
+            --background: #020617;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-tertiary: #64748b;
+            --border: #334155;
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; font-family: 'Roboto', sans-serif; background: var(--background); color: var(--text-main); height: 100vh; overflow: hidden; display: flex; flex-direction: column; transition: background 0.3s, color 0.3s; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+        }
+
+        /* SCROLL FIX - Main scroll container */
+        #scroll-container {
+            flex: 1;
+            overflow-y: auto !important;
+            overflow-x: hidden;
+            padding-bottom: 80px;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Ensure content is scrollable */
+        #view-home, #view-dev {
+            min-height: 100%;
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--border);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        /* Header */
+        .main-header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 15;
+            flex-shrink: 0;
+        }
+
+        .header-top {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .search-bar {
+            flex: 1;
+            background: var(--surface-variant);
+            border-radius: 30px;
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+
+        .search-bar:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0,135,95,0.1);
+        }
+
+        .search-bar input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: 15px;
+            outline: none;
+            color: var(--text-primary);
+        }
+
+        .notification-bell {
+            position: relative;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--surface-variant);
+        }
         
+        .notification-bell:active {
+            transform: scale(0.95);
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: #ef4444;
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 20px;
+            min-width: 18px;
+            text-align: center;
+            display: none;
+        }
+
+        .user-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--surface-variant);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid var(--primary);
+        }
+
+        /* Navigation Bar */
+        .nav-bar {
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-bar-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 16px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-tertiary);
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .nav-bar-item .material-icons-round {
+            font-size: 22px;
+        }
+
+        .nav-bar-item.active {
+            color: var(--primary);
+            background: var(--ripple);
+        }
+
+        .download-store-btn {
+            background: var(--primary);
+            color: white !important;
+            padding: 6px 16px;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Category Section */
+        .category-section {
+            position: relative;
+            padding: 16px 16px 20px;
+            background: var(--surface);
+            margin-bottom: 8px;
+        }
+
+        .category-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .category-scroll {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            scrollbar-width: thin;
+            padding-bottom: 8px;
+        }
+
+        .category-chip {
+            background: var(--surface-variant);
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        .category-chip.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* App Card */
+        .app-list-item {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            margin: 8px 16px;
+            background: var(--surface);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.25s;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .app-list-item:active {
+            transform: scale(0.98);
+        }
+
+        .app-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            object-fit: cover;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .app-info {
+            flex: 1;
+            margin-left: 14px;
+        }
+
+        .app-name {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .app-short-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .app-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 11px;
+            color: var(--text-tertiary);
+        }
+
+        .rating {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .rating .material-icons-round {
+            font-size: 14px;
+            color: #fbbf24;
+        }
+
+        .install-btn-small {
+            background: var(--primary);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            display: flex;
+            padding: 8px 16px 20px;
+            gap: 8px;
+            z-index: 20;
+        }
+
+        .bottom-nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 0;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-tertiary);
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .bottom-nav-item .material-icons-round {
+            font-size: 22px;
+        }
+
+        .bottom-nav-item.active {
+            color: var(--primary);
+            background: var(--ripple);
+        }
+
+        /* Splash Screen - Fixed */
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #001e17 0%, #004d40 50%, #00875F 100%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.6s ease-out;
+        }
+
+        .splash-logo-text {
+            font-size: 48px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff, #a8ffd4, #4ade80);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 3px;
+            text-align: center;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .splash-sub {
+            color: rgba(255,255,255,0.7);
+            margin-top: 12px;
+            font-size: 14px;
+            animation: fadeInUp 0.8s ease 0.2s backwards;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(4px);
+            z-index: 300;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.2s;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background: var(--surface);
+            border-radius: 28px;
+            padding: 24px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        /* Page Views */
+        .page-view {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--background);
+            z-index: 50;
+            transform: translateX(100%);
+            transition: transform 0.3s;
+            overflow-y: auto;
+        }
+
+        .page-view.open {
+            transform: translateX(0);
+        }
+
+        .page-header {
+            position: sticky;
+            top: 0;
+            background: var(--surface);
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border-bottom: 1px solid var(--border);
+            z-index: 5;
+        }
+
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        /* Buttons */
+        .btn {
+            border: none;
+            padding: 14px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.97);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid var(--border);
+            color: var(--primary);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1.5px solid var(--border);
+            border-radius: 16px;
+            font-size: 15px;
+            background: var(--surface);
+            color: var(--text-primary);
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Radio Group */
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 8px;
+        }
+        
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        
+        .radio-option input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        .apk-upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 20px;
+            padding: 30px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--surface-variant);
+        }
+
+        .wallet-card {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 28px;
+            padding: 24px;
+            color: white;
+            margin-bottom: 24px;
+        }
+
+        .wallet-balance {
+            font-size: 40px;
+            font-weight: 800;
+            margin: 12px 0;
+        }
+
+        .review-card {
+            background: var(--surface);
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .star-input {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .star-input i {
+            font-size: 28px;
+            cursor: pointer;
+            color: #cbd5e1;
+        }
+
+        .star-input i.active {
+            color: #fbbf24;
+        }
+
+        .dialog-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.2s;
+        }
+
+        .dialog-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .dialog-card {
+            background: var(--surface);
+            border-radius: 32px;
+            padding: 24px;
+            width: 90%;
+            max-width: 340px;
+        }
+
+        .loader {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         .hidden { display: none !important; }
-        .btn { border: none; padding: 10px 24px; border-radius: 8px; font-weight: 500; cursor: pointer; font-size: 14px; transition: 0.2s; }
-        .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(0,135,95,0.3); }
-        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--primary); }
-        
-        .input-group { margin-bottom: 16px; width: 100%; }
-        .input-group label { display: block; margin-bottom: 6px; color: var(--text-sec); font-size: 12px; }
-        input, textarea, select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 16px; outline: none; background: var(--surface); color: var(--text-main); }
-        
-        /* VIEWS */
-        #splash-screen, #auth-overlay, #main-app, #page-overlays { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-        #main-app { pointer-events: auto; display: flex; flex-direction: column; z-index: 10; }
-        
-        /* SPLASH SCREEN */
-        #splash-screen { 
-            background: linear-gradient(135deg, #001e17 0%, #004d40 100%);
-            z-index: 9999; pointer-events: auto; 
-            display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            overflow: hidden; position: absolute; width: 100%; height: 100%;
-            transition: opacity 0.8s ease-out;
+        .error-text { color: #ef4444; font-size: 12px; margin-top: 5px; display: none; }
+        .success-text { color: var(--primary); font-size: 12px; margin-top: 5px; display: none; }
+        .screenshots-preview {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            margin-top: 12px;
         }
-        .splash-circle {
-            width: 140px; height: 140px; background: white; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 30px rgba(0, 255, 150, 0.4);
-            animation: floatLogo 3s ease-in-out infinite; z-index: 2; margin-bottom: 20px;
+        .screenshots-preview img {
+            width: 100px;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 16px;
         }
-        .splash-logo { width: 90px; height: 90px; object-fit: contain; }
-        .splash-text { color: white; font-size: 28px; font-weight: 700; letter-spacing: 1px; z-index: 2; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
-        .floating-icon { position: absolute; bottom: -60px; color: rgba(255, 255, 255, 0.1); font-size: 30px; animation: floatUp 5s linear infinite; z-index: 1; }
-        
-        @keyframes floatUp { 0% { transform: translateY(0) scale(0.8); opacity: 0; } 20% { opacity: 0.6; } 100% { transform: translateY(-110vh) scale(1.2); opacity: 0; } }
-        @keyframes floatLogo { 0%, 100% { transform: translateY(0px); box-shadow: 0 0 30px rgba(0, 255, 150, 0.4); } 50% { transform: translateY(-10px); box-shadow: 0 0 50px rgba(0, 255, 150, 0.6); } }
-
-        /* AUTH OVERLAY */
-        #auth-overlay { 
-            background: var(--surface); z-index: 200; pointer-events: auto; 
-            display: flex; flex-direction: column; justify-content: center; 
-            padding: 32px; transform: translateY(100%); transition: transform 0.3s; 
-            position: fixed; width: 100%; height: 100%;
+        .screenshots-scroll {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            margin: 20px -24px;
+            padding: 0 24px;
         }
-        #auth-overlay.open { transform: translateY(0); }
+        .screenshots-scroll img {
+            height: 200px;
+            border-radius: 20px;
+        }
 
-        /* HEADER & LIST */
-        header { padding: 16px; display: flex; align-items: center; justify-content: space-between; background: var(--surface); box-shadow: 0 1px 0 var(--border); z-index: 10; }
-        .search-bar { flex: 1; background: var(--background); padding: 6px 16px; border-radius: 8px; display: flex; align-items: center; margin-right: 16px; border: 1px solid var(--border); }
-        .search-bar input { border: none; background: transparent; padding: 8px; outline: none; font-size: 16px; width: 100%; color: var(--text-main); }
-        .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: #ddd; background-size: cover; cursor: pointer; border: 1px solid var(--border); }
-        
-        #scroll-container { flex: 1; overflow-y: auto; padding-bottom: 80px; }
-        .app-list-item { display: flex; padding: 16px; cursor: pointer; transition: 0.2s; position: relative; }
-        .app-list-item:active { background: rgba(0,0,0,0.05); }
-        .app-icon { width: 64px; height: 64px; border-radius: 14px; background: #eee; object-fit: cover; box-shadow: var(--card-shadow); }
-        .app-info { margin-left: 16px; flex: 1; display: flex; flex-direction: column; justify-content: center; }
-        
-        .edit-btn { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); background: var(--background); padding: 6px 12px; border-radius: 6px; font-size: 12px; border: 1px solid var(--border); color: var(--primary); }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.3s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: var(--primary);
+        }
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
 
-        /* PAGES */
-        .page-view { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--surface); z-index: 50; overflow-y: auto; padding-bottom: 40px; transform: translateX(100%); transition: transform 0.3s; pointer-events: auto; }
-        .page-view.open { transform: translateX(0); }
-        .page-header { padding: 16px; display: flex; align-items: center; border-bottom: 1px solid var(--border); }
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .status-approved { background: #d1fae5; color: #059669; }
+        .status-pending { background: #fef3c7; color: #d97706; }
+        .status-rejected { background: #fee2e2; color: #dc2626; }
+        .edit-btn { cursor: pointer; transition: 0.2s; }
+        .edit-btn:active { transform: scale(0.95); }
 
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--surface); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 8px 0; z-index: 20; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-sec); font-size: 12px; cursor: pointer; flex: 1; }
-        .nav-item.active { color: var(--primary); }
-
-        .loader { border: 3px solid #f3f3f3; border-top: 3px solid var(--primary); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; display: none; margin: 10px auto;}
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
-        .upload-area { border: 2px dashed var(--border); border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 10px; cursor: pointer; background: var(--background); }
-        .preview-img { max-width: 100%; height: auto; display: none; margin-top: 5px; border-radius: 6px;}
-        .multi-preview { display: flex; gap: 8px; overflow-x: auto; margin-top: 10px; padding-bottom: 5px; }
-        .multi-preview img { height: 80px; border-radius: 6px; border: 1px solid var(--border); }
-
-        /* WALLET */
-        .wallet-card { background: linear-gradient(135deg, #00875F 0%, #004d40 100%); color: white; padding: 24px; border-radius: 20px; margin-bottom: 24px; box-shadow: 0 10px 20px rgba(0,135,95,0.2); }
-        .wallet-balance { font-size: 32px; font-weight: bold; margin: 10px 0; }
-        .history-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
-        .legal-box { background: var(--background); border: 1px solid var(--border); padding: 12px; border-radius: 8px; font-size: 12px; color: var(--text-sec); margin-bottom: 16px; }
-        
-        /* CONTACT & REVIEWS */
-        .dev-contact-section { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); }
-        .dev-contact-row { display: flex; align-items: center; margin-bottom: 10px; font-size: 14px; color: var(--text-main); }
-        .policy-link { display: block; margin-top: 15px; color: var(--primary); text-decoration: none; font-weight: 500; font-size: 14px; }
-        
-        .review-section { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); }
-        .star-input { display: flex; gap: 5px; margin-bottom: 10px; }
-        .star-input i { color: #ddd; font-size: 24px; cursor: pointer; }
-        .star-input i.active { color: #FFC107; }
-        .review-card { background: var(--background); padding: 12px; border-radius: 8px; margin-bottom: 10px; border: 1px solid var(--border); }
-        .review-header { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-sec); margin-bottom: 4px; }
-        .reply-box { background: rgba(0, 135, 95, 0.1); padding: 8px; border-radius: 6px; margin-top: 8px; font-size: 13px; border-left: 3px solid var(--primary); }
-
-        .dialog-overlay { background: rgba(0,0,0,0.6); position:fixed; top:0; left:0; width:100%; height:100%; z-index:200; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:0.2s; backdrop-filter: blur(2px); }
-        .dialog-overlay.show { opacity:1; pointer-events:auto; }
-        .dialog-card { background: var(--surface); width: 90%; max-width: 400px; border-radius: 24px; padding: 24px; transform: scale(0.9); transition:0.2s; color: var(--text-main); }
-        .dialog-overlay.show .dialog-card { transform: scale(1); }
+        .notification-item {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .notification-unread {
+            background: var(--ripple);
+            border-left: 3px solid var(--primary);
+        }
+        .notification-subject {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+        .notification-message {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
     </style>
 </head>
 <body>
 
+<!-- Splash Screen -->
 <div id="splash-screen">
-    <div id="bubbles-container"></div>
-    <div class="splash-circle"><img src="https://i.ibb.co/GQvPFTYx/file-000000001af07206a38c1562e9852d29.png" class="splash-logo"></div>
-    <div class="splash-text">RikiApp</div>
-    <div class="loader" style="display:block; border-color: rgba(255,255,255,0.2); border-top-color: #ffffff; margin-top: 20px;"></div>
+    <div class="splash-logo-text">RikiApp Store</div>
+    <div class="splash-sub">Official Android App Store</div>
+    <div class="loader" style="margin-top: 40px; border-color: rgba(255,255,255,0.2); border-top-color: white;"></div>
 </div>
 
-<div id="main-app">
-    <header>
-        <div class="search-bar">
-            <span class="material-icons-round" style="color:var(--text-sec); margin-right:8px">search</span>
-            <input type="text" id="search-input" placeholder="Search apps">
+<!-- Main App -->
+<div id="main-app" style="display: flex; flex-direction: column; height: 100vh;">
+    <div class="main-header">
+        <div class="header-top">
+            <div class="search-bar">
+                <span class="material-icons-round" style="color: var(--text-tertiary);">search</span>
+                <input type="text" id="search-input" placeholder="Search apps & games...">
+            </div>
+            <div class="notification-bell" id="notificationBell" onclick="openNotifications()">
+                <span class="material-icons-round">notifications</span>
+                <span id="notificationCount" class="notification-badge">0</span>
+            </div>
+            <div class="user-avatar" id="headerAvatar" onclick="handleProfileClick()">
+                <span class="material-icons-round" style="color: var(--text-secondary);">person</span>
+            </div>
         </div>
-        <div class="user-avatar" id="headerAvatar" onclick="handleProfileClick()"></div>
-    </header>
+        
+        <div class="nav-bar">
+            <div class="nav-bar-item" data-nav="games" onclick="filterByNav('games')">
+                <span class="material-icons-round">sports_esports</span>
+                <span>Games</span>
+            </div>
+            <div class="nav-bar-item" data-nav="apps" onclick="filterByNav('apps')">
+                <span class="material-icons-round">apps</span>
+                <span>Apps</span>
+            </div>
+            <div class="nav-bar-item download-store-btn" onclick="downloadAppStore()">
+                <span class="material-icons-round">download</span>
+                <span>RikiApp Store</span>
+            </div>
+        </div>
+    </div>
 
+    <!-- SCROLL CONTAINER - FIXED -->
     <div id="scroll-container">
         <div id="view-home">
-            <h3 style="padding:16px 16px 8px; margin:0; font-size:18px;">Recommended</h3>
+            <div class="category-section">
+                <div class="category-title">CATEGORIES</div>
+                <div class="category-scroll" id="category-scroll">
+                    <div class="category-chip active" data-cat="all">All</div>
+                    <div class="category-chip" data-cat="Games">🎮 Games</div>
+                    <div class="category-chip" data-cat="App">📱 Apps</div>
+                    <div class="category-chip" data-cat="Entertainment">🎬 Entertainment</div>
+                    <div class="category-chip" data-cat="Productivity">💼 Productivity</div>
+                    <div class="category-chip" data-cat="Education">📚 Education</div>
+                    <div class="category-chip" data-cat="Tools">🔧 Tools</div>
+                    <div class="category-chip" data-cat="Social">💬 Social</div>
+                    <div class="category-chip" data-cat="Photography">📷 Photography</div>
+                    <div class="category-chip" data-cat="Music">🎵 Music</div>
+                    <div class="category-chip" data-cat="Finance">💰 Finance</div>
+                    <div class="category-chip" data-cat="Health">❤️ Health</div>
+                    <div class="category-chip" data-cat="Sports">⚽ Sports</div>
+                </div>
+            </div>
+            
+            <div style="padding: 0 16px;">
+                <h3 style="font-size: 18px; font-weight: 700;">Recommended for You</h3>
+                <p style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">Trending apps this week</p>
+            </div>
             <div id="apps-container"></div>
-            <div id="no-results" style="text-align:center; padding:20px; color:var(--text-sec); display:none;">No apps found</div>
+            <div id="no-results" style="text-align: center; padding: 60px 20px; color: var(--text-secondary); display: none;">
+                <span class="material-icons-round" style="font-size: 64px;">search_off</span>
+                <p style="margin-top: 16px;">No apps found</p>
+            </div>
         </div>
-        <div id="view-dev" class="hidden" style="padding:16px; padding-bottom:100px;"><div id="dev-content"></div></div>
+
+        <div id="view-dev" class="hidden" style="padding: 16px; padding-bottom: 100px;">
+            <div id="dev-content"></div>
+        </div>
     </div>
 
     <div class="bottom-nav">
-        <div class="nav-item active" onclick="navTo('home')"><span class="material-icons-round">games</span>Apps</div>
-        <div class="nav-item" onclick="navTo('dev')"><span class="material-icons-round">monetization_on</span>Earnings</div>
+        <div class="bottom-nav-item active" onclick="bottomNavTo('home')">
+            <span class="material-icons-round">storefront</span>
+            <span>Home</span>
+        </div>
+        <div class="bottom-nav-item" onclick="bottomNavTo('dev')">
+            <span class="material-icons-round">dashboard_customize</span>
+            <span>Studio</span>
+        </div>
     </div>
 </div>
 
-<!-- AUTH OVERLAY -->
-<div id="auth-overlay">
-    <span class="material-icons-round" style="align-self:flex-end; font-size:30px; cursor:pointer; color:var(--text-main)" onclick="closeAuth()">close</span>
-    <div class="splash-logo" style="width:64px; height:64px; align-self:center; display:flex; justify-content:center; align-items:center; background:#00875F; border-radius:16px; margin-bottom:16px;"><span class="material-icons-round" style="font-size:32px; color:white;">lock</span></div>
-    <h2 style="text-align:center;">Sign In / Sign Up</h2>
-    <div class="input-group"><label>Email</label><input type="email" id="auth-email"></div>
-    <div class="input-group"><label>Password</label><input type="password" id="auth-pass"></div>
-    <button class="btn btn-primary" onclick="doLogin()">Sign In</button>
-    <button class="btn btn-outline" style="margin-top:10px;" onclick="doSignup()">Create Account</button>
-    <a href="#" onclick="resetPassword()" style="font-size:12px; color:var(--primary); margin-top:10px; display:block; text-align:center;">Forgot Password?</a>
-    <div id="auth-msg" style="color:red; text-align:center; margin-top:10px; font-size:12px;"></div>
+<!-- Auth Overlay -->
+<div id="auth-overlay" style="position:fixed; top:0; left:0; right:0; bottom:0; background:var(--surface); z-index:200; transform:translateY(100%); transition:transform 0.3s; overflow-y:auto; padding:32px 24px;">
+    <div style="display: flex; justify-content: flex-end;">
+        <span class="material-icons-round" style="font-size: 28px; cursor: pointer;" onclick="closeAuth()">close</span>
+    </div>
+    <div style="text-align: center; margin: 20px 0 30px;">
+        <div style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--primary), var(--primary-light)); border-radius: 24px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
+            <span class="material-icons-round" style="font-size: 48px; color: white;">storefront</span>
+        </div>
+        <h2 style="font-size: 28px; font-weight: 700;">Welcome Back</h2>
+        <p style="color: var(--text-secondary); margin-top: 8px;">Sign in to continue to RikiApp Store</p>
+    </div>
+    <div class="input-group">
+        <label>Email</label>
+        <input type="email" id="auth-email" placeholder="your@email.com">
+    </div>
+    <div class="input-group">
+        <label>Password</label>
+        <input type="password" id="auth-pass" placeholder="••••••••">
+    </div>
+    <button class="btn btn-primary" style="width: 100%;" onclick="doLogin()">Sign In</button>
+    <button class="btn btn-outline" style="width: 100%; margin-top: 12px;" onclick="doSignup()">Create Account</button>
+    <div id="auth-msg" style="color: #ef4444; text-align: center; margin-top: 16px; font-size: 13px;"></div>
 </div>
 
+<!-- Notification Modal -->
+<div id="notification-modal" class="modal-overlay">
+    <div class="modal-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3 style="font-size: 18px; font-weight: 700;">📬 Notifications</h3>
+            <span class="material-icons-round" style="cursor: pointer;" onclick="closeNotifications()">close</span>
+        </div>
+        <div id="notifications-list" style="max-height: 500px; overflow-y: auto;"></div>
+    </div>
+</div>
+
+<!-- App Detail Page -->
 <div id="page-detail" class="page-view">
-    <div class="page-header"><span class="material-icons-round" style="margin-right:16px; cursor:pointer; color:var(--text-main)" onclick="closePage('page-detail')">arrow_back</span><span style="font-weight:500">Details</span></div>
-    <div style="padding:24px;">
-        <div style="display:flex; margin-bottom:24px;">
-            <img id="det-icon" style="width:72px; height:72px; border-radius:16px; margin-right:20px; box-shadow:0 4px 8px rgba(0,0,0,0.1);">
-            <div><h1 id="det-title" style="margin:0; font-size:24px;"></h1><div id="det-cat" style="color:var(--primary); font-weight:500; margin-top:4px;"></div><div style="font-size:12px; color:var(--text-sec)">Contains ads</div></div>
+    <div class="page-header">
+        <div class="back-btn" onclick="closePage('page-detail')">
+            <span class="material-icons-round">arrow_back</span>
         </div>
-        <button id="btn-install" class="btn btn-primary" style="width:100%; border-radius:24px; padding:12px;">Install</button>
-        <div style="display:flex; overflow-x:auto; gap:10px; margin:20px -24px; padding:0 24px;" id="det-screens"></div>
-        
-        <h3>About</h3>
-        <p id="det-desc" style="color:var(--text-sec); line-height:1.5"></p>
-
-        <div class="dev-contact-section">
-            <h3>Developer Contact</h3>
-            <div class="dev-contact-row"><span class="material-icons-round" style="margin-right:10px">business</span><span id="det-dev-name"></span></div>
-            <div class="dev-contact-row"><span class="material-icons-round" style="margin-right:10px">email</span><span id="det-dev-email"></span></div>
-            <div class="dev-contact-row"><span class="material-icons-round" style="margin-right:10px">location_on</span><span id="det-dev-addr"></span></div>
-            <div class="dev-contact-row" id="det-web-row"><span class="material-icons-round" style="margin-right:10px">language</span><a id="det-website" href="#" target="_blank" style="color:var(--primary);text-decoration:none;">Visit Website</a></div>
-            <a id="det-policy" href="#" target="_blank" class="policy-link">Privacy Policy</a>
-        </div>
-
-        <div class="review-section">
-            <h3>Ratings & Reviews</h3>
-            <div id="review-form">
-                <div class="star-input"><i class="material-icons-round" onclick="setRate(1)">star</i><i class="material-icons-round" onclick="setRate(2)">star</i><i class="material-icons-round" onclick="setRate(3)">star</i><i class="material-icons-round" onclick="setRate(4)">star</i><i class="material-icons-round" onclick="setRate(5)">star</i></div>
-                <textarea id="review-text" rows="2" placeholder="Write a review..."></textarea>
-                <button class="btn btn-primary" style="margin-top:5px; font-size:12px; padding:8px 16px;" onclick="submitReview()">Post Review</button>
+        <span style="font-weight: 600; font-size: 18px;">App Details</span>
+    </div>
+    <div style="padding: 24px;">
+        <div style="display: flex; gap: 20px; margin-bottom: 24px;">
+            <img id="det-icon" style="width: 80px; height: 80px; border-radius: 20px;">
+            <div>
+                <h1 id="det-title" style="font-size: 22px; font-weight: 700; margin-bottom: 6px;"></h1>
+                <div id="det-cat" style="color: var(--primary); font-weight: 500; font-size: 13px;"></div>
+                <div style="display: flex; gap: 16px; margin-top: 8px; font-size: 12px; color: var(--text-secondary);">
+                    <span>⭐ <span id="det-rating">0</span></span>
+                    <span>📥 <span id="det-downloads">0</span> downloads</span>
+                </div>
             </div>
-            <div id="reviews-list" style="margin-top:15px"></div>
         </div>
-    </div>
-</div>
-
-<div id="page-withdraw" class="page-view">
-    <div class="page-header"><span class="material-icons-round" style="margin-right:16px;cursor:pointer" onclick="closePage('page-withdraw')">arrow_back</span><span style="font-weight:500">Withdrawal</span></div>
-    <div style="padding:24px;">
-        <div class="wallet-card"><div>Available Balance</div><div class="wallet-balance" id="withdraw-balance">₹0.00</div></div>
-        <div class="input-group"><label>Amount (INR)</label><input type="number" id="wd-amount" placeholder="Min ₹10"></div>
-        <div class="input-group"><label>Method</label><select id="wd-method"><option value="UPI">UPI</option><option value="Bank">Bank</option><option value="USDT">USDT Trc20</option></select></div>
-        <div class="input-group"><label>Details</label><textarea id="wd-details" rows="3" placeholder="Payment Details"></textarea></div>
-        <button class="btn btn-primary" style="width:100%" onclick="submitWithdrawal()">Submit Request</button>
-    </div>
-</div>
-
-<div id="page-profile" class="page-view">
-    <div class="page-header"><span class="material-icons-round" style="margin-right:16px;cursor:pointer" onclick="closePage('page-profile')">arrow_back</span><span style="font-weight:500">Profile</span></div>
-    <div style="padding:24px; text-align:center;">
-        <img id="prof-img" style="width:100px; height:100px; border-radius:50%; object-fit:cover; margin-bottom:16px;">
-        <br><button class="btn btn-outline" onclick="document.getElementById('file-prof').click()">Change Photo</button><input type="file" id="file-prof" hidden onchange="previewSingleImg(this, 'prof-img')">
-        <div class="input-group" style="margin-top:20px; text-align:left;"><label>Display Name</label><input type="text" id="prof-name"></div>
-        <div class="input-group" style="text-align:left;"><label>Website URL</label><input type="url" id="prof-web" placeholder="https://yourwebsite.com"></div>
         
-        <div id="prof-kyc-info" style="text-align:left; background:var(--background); padding:10px; border-radius:8px; margin-bottom:20px; display:none;"></div>
-        <div style="display:flex; justify-content:space-between; align-items:center; background:var(--background); padding:12px; border-radius:8px; margin-bottom:20px; border:1px solid var(--border);">
-            <div style="display:flex; align-items:center;"><span class="material-icons-round" style="margin-right:10px">dark_mode</span>Dark Mode</div>
-            <label class="switch" style="position:relative; display:inline-block; width:40px; height:24px;"><input type="checkbox" id="dark-toggle" onchange="toggleDark()"><span class="slider" style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:#ccc; transition:.4s; border-radius:24px;"></span><span class="slider-before" style="position:absolute; content:''; height:16px; width:16px; left:4px; bottom:4px; background-color:white; transition:.4s; border-radius:50%;"></span></label>
-            <style> input:checked + .slider { background-color: var(--primary); } input:checked + .slider .slider-before { transform: translateX(16px); } </style>
+        <button id="btn-install" class="btn btn-primary" style="width: 100%; border-radius: 40px; padding: 16px;" onclick="tryInstall()">
+            <span class="material-icons-round" style="vertical-align: middle; margin-right: 8px;">download</span>
+            Install Now
+        </button>
+        
+        <div id="det-screens" class="screenshots-scroll"></div>
+        
+        <h3 style="margin: 24px 0 12px; font-size: 18px; font-weight: 600;">About this app</h3>
+        <p id="det-desc" style="color: var(--text-secondary); line-height: 1.6;"></p>
+        
+        <div style="margin-top: 24px; padding: 16px; background: var(--surface-variant); border-radius: 20px;">
+            <h4 style="font-size: 14px; margin-bottom: 12px;">Developer Info</h4>
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                <span class="material-icons-round">business</span>
+                <span id="det-dev-name"></span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                <span class="material-icons-round">email</span>
+                <span id="det-dev-email"></span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span class="material-icons-round">public</span>
+                <span id="det-dev-website"></span>
+            </div>
         </div>
-        <button class="btn btn-primary" style="width:100%" onclick="saveProfile()">Save Changes</button>
-        <button class="btn" style="width:100%; margin-top:20px; color:red;" onclick="firebase.auth().signOut(); closePage('page-profile')">Log Out</button>
+        
+        <div style="margin-top: 24px;">
+            <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">Ratings & Reviews</h3>
+            <div id="review-form">
+                <div class="star-input" id="star-input-container">
+                    <i class="material-icons-round" onclick="setRate(1)">star_outline</i>
+                    <i class="material-icons-round" onclick="setRate(2)">star_outline</i>
+                    <i class="material-icons-round" onclick="setRate(3)">star_outline</i>
+                    <i class="material-icons-round" onclick="setRate(4)">star_outline</i>
+                    <i class="material-icons-round" onclick="setRate(5)">star_outline</i>
+                </div>
+                <textarea id="review-text" rows="3" placeholder="Write your review..." style="border-radius: 16px; margin-top: 8px;"></textarea>
+                <button class="btn btn-primary" style="margin-top: 12px; width: 100%;" onclick="submitReview()">Post Review</button>
+            </div>
+            <div id="reviews-list" style="margin-top: 20px;"></div>
+        </div>
     </div>
 </div>
 
+<!-- Create/Edit App Page - With APK Upload + Direct Link Option -->
 <div id="page-create" class="page-view">
-    <div class="page-header"><span class="material-icons-round" style="margin-right:16px;cursor:pointer" onclick="closePage('page-create')">arrow_back</span><span style="font-weight:500" id="create-title">Create App</span></div>
-    <div style="padding:24px;">
+    <div class="page-header">
+        <div class="back-btn" onclick="closePage('page-create')">
+            <span class="material-icons-round">arrow_back</span>
+        </div>
+        <span style="font-weight: 600; font-size: 18px;" id="create-title">Submit New App</span>
+    </div>
+    <div style="padding: 24px;">
         <input type="hidden" id="edit-app-id">
-        <div class="input-group"><label>App Name</label><input type="text" id="new-name"></div>
-        <div class="input-group"><label>Type</label><select id="new-type" onchange="updateCategories()"><option value="App">App</option><option value="Game">Game</option></select></div>
-        <div class="input-group"><label>Category</label><select id="new-cat"></select></div>
-        <div class="input-group"><label>Description</label><textarea id="new-desc" rows="3"></textarea></div>
-        <div class="input-group"><label>Version</label><input type="text" id="new-ver"></div>
-        <div class="input-group"><label>Privacy Policy URL</label><input type="url" id="new-policy"></div>
-        <div class="input-group"><label>App Icon</label><div class="upload-area" onclick="document.getElementById('file-icon').click()">Select Icon</div><input type="file" id="file-icon" hidden onchange="previewSingleImg(this, 'prev-icon')"><img id="prev-icon" class="preview-img"></div>
-        <div class="input-group"><label>Screenshots (Min 2)</label><div class="upload-area" onclick="document.getElementById('file-screens').click()">Select Screenshots (Multiple)</div><input type="file" id="file-screens" hidden multiple accept="image/*" onchange="previewMultiImgs(this)"><div id="screens-preview" class="multi-preview"></div></div>
-        <div class="input-group"><label>Download URL</label><input type="url" id="new-url"></div>
-        <button class="btn btn-primary" style="width:100%" onclick="submitApp()">Submit for Review</button>
-        <div id="create-loader" class="loader"></div>
+        
+        <!-- Upload Method Selection -->
+        <div class="form-group">
+            <label>Upload Method</label>
+            <div class="radio-group">
+                <label class="radio-option">
+                    <input type="radio" name="upload-type" value="apk" checked onchange="toggleUploadMethod()">
+                    <span>📱 Upload APK File</span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="upload-type" value="link" onchange="toggleUploadMethod()">
+                    <span>🔗 Direct Download Link</span>
+                </label>
+            </div>
+        </div>
+        
+        <div class="input-group">
+            <label>App Name *</label>
+            <input type="text" id="new-name" placeholder="Enter app name">
+        </div>
+        
+        <div class="input-group">
+            <label>Category *</label>
+            <select id="new-cat">
+                <option value="Games">🎮 Games</option>
+                <option value="App">📱 Apps</option>
+                <option value="Entertainment">🎬 Entertainment</option>
+                <option value="Productivity">💼 Productivity</option>
+                <option value="Education">📚 Education</option>
+                <option value="Tools">🔧 Tools</option>
+                <option value="Social">💬 Social</option>
+                <option value="Photography">📷 Photography</option>
+                <option value="Music">🎵 Music</option>
+                <option value="Finance">💰 Finance</option>
+                <option value="Health">❤️ Health</option>
+                <option value="Sports">⚽ Sports</option>
+            </select>
+        </div>
+        
+        <div class="input-group">
+            <label>Short Description</label>
+            <input type="text" id="new-short-desc" placeholder="Brief description" maxlength="60">
+        </div>
+        
+        <div class="input-group">
+            <label>Full Description *</label>
+            <textarea id="new-desc" rows="4" placeholder="Detailed description..."></textarea>
+        </div>
+        
+        <div class="input-group">
+            <label>Version</label>
+            <input type="text" id="new-ver" placeholder="1.0.0">
+        </div>
+        
+        <div class="input-group">
+            <label>Privacy Policy URL *</label>
+            <input type="url" id="new-policy" placeholder="https://yourdomain.com/privacy-policy">
+            <div id="policy-error" class="error-text">⚠️ Privacy Policy URL is required</div>
+        </div>
+        
+        <div class="input-group">
+            <label>Developer Website</label>
+            <input type="url" id="new-website" placeholder="https://yourwebsite.com">
+        </div>
+        
+        <!-- APK File Upload Section -->
+        <div id="apk-upload-section" class="form-group">
+            <label>APK File (.apk) *</label>
+            <div class="apk-upload-area" onclick="document.getElementById('apk-file').click()">
+                <span class="material-icons-round" style="font-size: 48px; color: var(--primary);">file_upload</span>
+                <p style="margin-top: 8px;">Click to upload APK</p>
+                <small>Only .apk files allowed</small>
+            </div>
+            <input type="file" id="apk-file" accept=".apk" hidden onchange="validateAndUploadAPK(this)">
+            <div id="apk-error" class="error-text">❌ Only .apk files are allowed!</div>
+            <div id="apk-success" class="success-text">✅ APK uploaded successfully!</div>
+            <div id="apk-uploading" style="display: none; margin-top: 10px;">
+                <div class="loader" style="width: 24px; height: 24px;"></div>
+                <p style="font-size: 12px;">Uploading to Gofile...</p>
+            </div>
+            <input type="hidden" id="apk-url">
+        </div>
+        
+        <!-- Direct Link Section -->
+        <div id="link-upload-section" class="form-group" style="display: none;">
+            <label>Direct Download URL *</label>
+            <input type="url" id="direct-link" class="form-input" placeholder="https://example.com/app.apk">
+            <div id="link-error" class="error-text">⚠️ Please enter a valid download URL</div>
+        </div>
+        
+        <div class="input-group">
+            <label>App Icon *</label>
+            <div class="apk-upload-area" style="padding: 15px;" onclick="document.getElementById('file-icon').click()">
+                <span class="material-icons-round">image</span> Upload Icon
+            </div>
+            <input type="file" id="file-icon" accept="image/*" hidden onchange="previewIcon(this)">
+            <img id="icon-preview" style="width: 80px; height: 80px; border-radius: 16px; margin-top: 10px; display: none;">
+        </div>
+        
+        <div class="input-group">
+            <label>Screenshots (min 2) *</label>
+            <div class="apk-upload-area" style="padding: 15px;" onclick="document.getElementById('file-screens').click()">
+                <span class="material-icons-round">screenshot</span> Upload Screenshots
+            </div>
+            <input type="file" id="file-screens" accept="image/*" multiple hidden onchange="previewScreens(this)">
+            <div id="screens-preview" class="screenshots-preview"></div>
+        </div>
+        
+        <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" onclick="submitApp()">Submit for Review</button>
+        <div id="create-loader" class="loader" style="display: none;"></div>
     </div>
 </div>
 
+<!-- Profile Page -->
+<div id="page-profile" class="page-view">
+    <div class="page-header">
+        <div class="back-btn" onclick="closePage('page-profile')">
+            <span class="material-icons-round">arrow_back</span>
+        </div>
+        <span style="font-weight: 600; font-size: 18px;">Profile</span>
+    </div>
+    <div style="padding: 24px;">
+        <div style="text-align: center; margin-bottom: 24px;">
+            <img id="prof-img" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary);">
+            <div class="input-group" style="margin-top: 16px;">
+                <input type="text" id="prof-name" placeholder="Display Name">
+            </div>
+        </div>
+        <div style="background: var(--surface-variant); padding: 16px; border-radius: 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span class="material-icons-round">dark_mode</span>
+                <span style="font-weight: 500;">Dark Mode</span>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="dark-toggle" onchange="toggleDark()">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <button class="btn btn-outline" style="width: 100%; margin-top: 20px; color: #ef4444; border-color: #ef4444;" onclick="logout()">Log Out</button>
+    </div>
+</div>
+
+<!-- Withdraw Page -->
+<div id="page-withdraw" class="page-view">
+    <div class="page-header">
+        <div class="back-btn" onclick="closePage('page-withdraw')">
+            <span class="material-icons-round">arrow_back</span>
+        </div>
+        <span style="font-weight: 600; font-size: 18px;">Withdraw Earnings</span>
+    </div>
+    <div style="padding: 24px;">
+        <div class="wallet-card">
+            <div>Available Balance</div>
+            <div class="wallet-balance" id="withdraw-balance">₹0.00</div>
+            <div id="usd-balance" style="font-size: 12px; opacity: 0.8;"></div>
+        </div>
+        <div class="input-group">
+            <label>Amount (INR)</label>
+            <input type="number" id="wd-amount" placeholder="Min ₹100">
+        </div>
+        <div class="input-group">
+            <label>Payment Method</label>
+            <select id="wd-method">
+                <option value="UPI">UPI (India)</option>
+                <option value="Binance">Binance (USDT - International)</option>
+                <option value="Bank">Bank Transfer (India)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label>Payment Details</label>
+            <textarea id="wd-details" rows="3" placeholder="UPI ID / Binance Wallet Address / Bank Account details"></textarea>
+        </div>
+        <button class="btn btn-primary" style="width: 100%;" onclick="submitWithdrawal()">Request Withdrawal</button>
+    </div>
+</div>
+
+<!-- Install Dialog -->
 <div id="install-modal" class="dialog-overlay">
     <div class="dialog-card">
-        <div style="display:flex; align-items:center; margin-bottom:16px;"><img id="modal-icon" style="width:40px; border-radius:8px; margin-right:12px;"><div><div id="modal-title" style="font-weight:500"></div><small>Permissions required</small></div></div>
-        <p style="color:var(--text-sec); font-size:13px;">• Network Access<br>• Storage Access</p>
-        <div style="text-align:right;"><button class="btn" style="color:var(--text-sec)" onclick="document.getElementById('install-modal').classList.remove('show')">Cancel</button><button class="btn btn-primary" onclick="confirmInstall()">Install</button></div>
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+            <img id="modal-icon" style="width: 48px; height: 48px; border-radius: 12px;">
+            <div>
+                <div id="modal-title" style="font-weight: 600; font-size: 16px;"></div>
+                <small style="color: var(--text-secondary);">Version <span id="modal-version"></span></small>
+            </div>
+        </div>
+        <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 20px;">This app will be downloaded from RikiApp Store. Continue?</p>
+        <div style="display: flex; gap: 12px;">
+            <button class="btn btn-outline" style="flex: 1;" onclick="closeInstallDialog()">Cancel</button>
+            <button class="btn btn-primary" style="flex: 1;" onclick="confirmInstall()">Install</button>
+        </div>
     </div>
 </div>
 
@@ -285,6 +1164,7 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
+    // ==================== FIREBASE CONFIG ====================
     const firebaseConfig = {
         apiKey: "AIzaSyBpK2TQhhdtm9eEGN8TEE6WTW3natf47OA",
         authDomain: "rikiapp-c3b21.firebaseapp.com",
@@ -294,211 +1174,932 @@
         messagingSenderId: "947081687732",
         appId: "1:947081687732:web:3808455f70e06e95869de1"
     };
+    
+    const GOFILE_TOKEN = "XX25iDe9RGA3qpcN3oynra4ZSgY7q9ls";
     const IMGBB_KEY = "07806a9e0f6db8a56403fcc0c909b163";
-    const RATE_PER_DOWNLOAD = 0.001; 
-
+    const SUPPORT_EMAIL = "nitai.grp00@gmail.com";
+    
+    // Earning Rates: 1000 downloads = ₹1 (India), $0.1 (International via Binance)
+    const EARNING_RATE_INR = 0.001; // per download = ₹0.001, so 1000 downloads = ₹1
+    const EARNING_RATE_USD = 0.0001; // per download = $0.0001, so 1000 downloads = $0.1
+    
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.database();
-
-    let currentUser = null, currentAppId = null, currentAppUrl = null, allApps = [];
-    let currentBalance = 0, currentRating = 0;
-
-    const categories = { "App": ["Art & Design", "Business", "Education", "Entertainment", "Finance", "Health", "Lifestyle", "Music", "Photography", "Productivity", "Social", "Tools", "Weather"], "Game": ["Action", "Adventure", "Arcade", "Board", "Card", "Puzzle", "Racing", "RPG", "Simulation", "Sports", "Strategy"] };
-
-    window.onload = () => { initSplash(); loadApps(); updateCategories(); if(localStorage.getItem('theme') === 'dark') { document.body.classList.add('dark-mode'); document.getElementById('dark-toggle').checked = true; } };
-
-    function initSplash() {
-        const container = document.getElementById('bubbles-container');
-        const icons = ['games', 'apps', 'android', 'rocket_launch', 'star', 'sports_esports', 'cloud_download', 'check_circle', 'category', 'widgets'];
-        for(let i=0; i<15; i++) {
-            const icon = document.createElement('span'); icon.className = 'material-icons-round floating-icon'; icon.innerText = icons[Math.floor(Math.random() * icons.length)];
-            icon.style.left = Math.random() * 100 + '%'; icon.style.animationDuration = (Math.random() * 3 + 2) + 's'; icon.style.animationDelay = (Math.random() * 2) + 's'; container.appendChild(icon);
+    
+    // ==================== GLOBAL VARIABLES ====================
+    let currentUser = null;
+    let allApps = [];
+    let currentAppId = null;
+    let currentAppData = null;
+    let currentRating = 0;
+    let currentBalance = 0;
+    let currentBalanceUSD = 0;
+    let currentCategory = "all";
+    let currentNavFilter = "all";
+    let userCountry = "IN"; // Default India
+    
+    // ==================== GET USER COUNTRY ====================
+    async function getUserCountry() {
+        try {
+            const response = await fetch('https://ipapi.co/json/');
+            const data = await response.json();
+            userCountry = data.country_code || "IN";
+            return userCountry;
+        } catch(e) {
+            userCountry = "IN";
+            return "IN";
         }
-        setTimeout(() => { document.getElementById('splash-screen').style.opacity='0'; setTimeout(()=>document.getElementById('splash-screen').style.display='none', 800);}, 2500);
     }
-
-    function toggleDark() { document.body.classList.toggle('dark-mode'); localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light'); }
-
-    auth.onAuthStateChanged(user => {
-        currentUser = user;
-        const avatar = document.getElementById('headerAvatar');
-        if(user) {
-            avatar.style.backgroundImage = `url(${user.photoURL || `https://ui-avatars.com/api/?name=${user.email}`})`;
-            db.ref('users/'+user.uid).once('value', s => {
-                const u = s.val();
-                if(u && u.website) document.getElementById('prof-web').value = u.website;
+    
+    // ==================== CALCULATE EARNINGS ====================
+    function calculateEarnings(downloads) {
+        if(userCountry === "IN") {
+            return downloads * EARNING_RATE_INR;
+        } else {
+            return downloads * EARNING_RATE_USD;
+        }
+    }
+    
+    function formatBalance(amount) {
+        if(userCountry === "IN") {
+            return `₹${amount.toFixed(2)}`;
+        } else {
+            return `$${amount.toFixed(2)} (USDT)`;
+        }
+    }
+    
+    // ==================== INITIALIZATION ====================
+    window.onload = async () => {
+        await getUserCountry();
+        
+        setTimeout(() => {
+            const splash = document.getElementById('splash-screen');
+            splash.style.opacity = '0';
+            setTimeout(() => splash.style.display = 'none', 600);
+        }, 2000);
+        
+        loadApps();
+        
+        if(localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+            document.getElementById('dark-toggle') && (document.getElementById('dark-toggle').checked = true);
+        }
+        
+        document.querySelectorAll('.category-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                currentCategory = chip.dataset.cat;
+                applyFilters();
             });
-            db.ref('kycData/'+user.uid).once('value', s=>{
-                const k = s.val();
-                if(k) {
-                    document.getElementById('prof-kyc-info').style.display='block';
-                    document.getElementById('prof-kyc-info').innerHTML = `<small style="color:var(--primary)"><b>Verified Developer</b></small><br>${k.legalName}<br>${k.address}`;
-                }
-            });
-        } else { avatar.style.backgroundImage = ''; avatar.innerHTML = '<span class="material-icons-round" style="font-size:24px; color:#666;">person</span>'; }
-    });
-
-    window.updateCategories = () => { const type = document.getElementById('new-type').value; const catSelect = document.getElementById('new-cat'); catSelect.innerHTML = ""; categories[type].forEach(c => { const opt = document.createElement('option'); opt.value = c; opt.innerText = c; catSelect.appendChild(opt); }); }
-    window.navTo = (tab) => { document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active')); if(tab === 'home') { document.querySelectorAll('.nav-item')[0].classList.add('active'); document.getElementById('view-home').classList.remove('hidden'); document.getElementById('view-dev').classList.add('hidden'); } else { if(!currentUser) return document.getElementById('auth-overlay').classList.add('open'); document.querySelectorAll('.nav-item')[1].classList.add('active'); document.getElementById('view-home').classList.add('hidden'); document.getElementById('view-dev').classList.remove('hidden'); loadDevContent(); } }
-
-    // FIXED LOAD APPS & SEARCH LOGIC
+        });
+    };
+    
+    function applyFilters() {
+        let filtered = allApps;
+        if(currentCategory !== "all") {
+            filtered = filtered.filter(app => app.category === currentCategory);
+        }
+        if(currentNavFilter === "games") {
+            filtered = filtered.filter(app => app.category === "Games");
+        } else if(currentNavFilter === "apps") {
+            filtered = filtered.filter(app => app.category !== "Games");
+        }
+        renderApps(filtered);
+    }
+    
+    window.filterByNav = (type) => {
+        currentNavFilter = type;
+        document.querySelectorAll('.nav-bar-item').forEach(item => {
+            if(item.dataset.nav === type) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        });
+        applyFilters();
+    };
+    
+    // ==================== LOAD APPS ====================
     function loadApps() {
-        db.ref('apps').orderByChild('status').equalTo('published').on('value', snap => {
+        db.ref('apps').orderByChild('status').equalTo('published').on('value', (snap) => {
             allApps = [];
-            snap.forEach(c => { allApps.push({key: c.key, ...c.val()}); });
-            renderApps(allApps);
+            snap.forEach((child) => {
+                allApps.push({ key: child.key, ...child.val() });
+            });
+            applyFilters();
         });
     }
-
-    function renderApps(list) {
+    
+    function renderApps(apps) {
         const container = document.getElementById('apps-container');
-        const noRes = document.getElementById('no-results');
-        container.innerHTML = '';
-        if(list.length === 0) { noRes.style.display = 'block'; } 
-        else {
-            noRes.style.display = 'none';
-            list.forEach(app => {
-                container.innerHTML += `<div class="app-list-item" onclick="openDetail('${app.key}')"><img class="app-icon" src="${app.icon}"><div class="app-info"><div style="font-size:16px; font-weight:bold">${app.name}</div><div style="font-size:12px; color:var(--text-sec)">${app.category || 'App'} • 4.5★</div></div></div>`;
-            });
+        const noResults = document.getElementById('no-results');
+        
+        if(!container) return;
+        
+        if(apps.length === 0) {
+            container.innerHTML = '';
+            noResults.style.display = 'block';
+            return;
         }
+        
+        noResults.style.display = 'none';
+        container.innerHTML = apps.map(app => `
+            <div class="app-list-item" onclick="openDetail('${app.key}')">
+                <img class="app-icon" src="${app.icon || 'https://via.placeholder.com/56'}" onerror="this.src='https://via.placeholder.com/56'">
+                <div class="app-info">
+                    <div class="app-name">${escapeHtml(app.name)}</div>
+                    <div class="app-short-desc">${escapeHtml(app.shortDesc || app.description?.substring(0, 50) || 'No description')}</div>
+                    <div class="app-meta">
+                        <span>${app.category || 'App'}</span>
+                        <div class="rating">
+                            <span class="material-icons-round">star</span>
+                            <span>${(app.avgRating || 4.2).toFixed(1)}</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="install-btn-small" onclick="event.stopPropagation(); openDetail('${app.key}')">Install</button>
+            </div>
+        `).join('');
     }
-
-    // SEARCH LISTENER FIX
-    document.getElementById('search-input').addEventListener('input', (e) => {
+    
+    // ==================== SEARCH ====================
+    document.getElementById('search-input')?.addEventListener('input', (e) => {
         const term = e.target.value.toLowerCase();
         const filtered = allApps.filter(app => app.name.toLowerCase().includes(term));
         renderApps(filtered);
     });
-
-    window.openDetail = (key) => {
-        currentAppId = key;
-        const app = allApps.find(a => a.key === key);
-        currentAppUrl = app.downloadUrl;
-        document.getElementById('det-title').innerText = app.name;
-        document.getElementById('det-icon').src = app.icon;
-        document.getElementById('det-desc').innerText = app.description;
-        document.getElementById('det-cat').innerText = `${app.category} • ${app.type}`;
+    
+    // ==================== NOTIFICATION SYSTEM ====================
+    function loadNotifications() {
+        if(!currentUser) return;
         
-        document.getElementById('det-dev-name').innerText = app.devName || "RikiApp Developer";
-        document.getElementById('det-dev-email').innerText = app.devEmail || "nitai.grp00@gmail.com";
-        document.getElementById('det-dev-addr').innerText = app.devAddr || "India";
-        
-        const webRow = document.getElementById('det-web-row');
-        const webLink = document.getElementById('det-website');
-        if(app.devWebsite) { webLink.href = app.devWebsite; webRow.style.display = 'flex'; } else { webRow.style.display = 'none'; }
-        
-        const policyLink = document.getElementById('det-policy');
-        if(app.privacyPolicy) { policyLink.href = app.privacyPolicy; policyLink.style.display = 'block'; } else { policyLink.style.display = 'none'; }
-
-        const screens = document.getElementById('det-screens'); screens.innerHTML = '';
-        if(app.screenshots) app.screenshots.forEach(s => screens.innerHTML += `<img src="${s}" style="height:200px; border-radius:8px">`);
-        
-        const btn = document.getElementById('btn-install');
-        btn.innerText = "Install"; btn.className = "btn btn-primary"; btn.onclick = tryInstall;
-        if(currentUser) { db.ref(`installs/${currentUser.uid}/${key}`).once('value', s => { if(s.exists()) { btn.innerText = "Open"; btn.className = "btn btn-outline"; btn.onclick = () => window.location.href = currentAppUrl; } }); }
-        
-        loadReviews(key, app.ownerUid);
-        document.getElementById('page-detail').classList.add('open');
-    }
-
-    window.setRate = (n) => { currentRating = n; const stars = document.querySelectorAll('.star-input i'); stars.forEach((s, i) => s.classList.toggle('active', i < n)); }
-
-    window.submitReview = async () => {
-        if(!currentUser) return document.getElementById('auth-overlay').classList.add('open');
-        const app = allApps.find(a => a.key === currentAppId);
-        if(app.ownerUid === currentUser.uid) return alert("Owners cannot review their own app.");
-        const installSnap = await db.ref(`installs/${currentUser.uid}/${currentAppId}`).once('value');
-        if(!installSnap.exists()) return alert("You must install the app to review it.");
-        const text = document.getElementById('review-text').value;
-        if(!currentRating || !text) return alert("Rate & write something!");
-        const review = { userId: currentUser.uid, userName: currentUser.displayName || "User", userPhoto: currentUser.photoURL, rating: currentRating, comment: text, timestamp: Date.now() };
-        db.ref(`reviews/${currentAppId}`).push(review);
-        document.getElementById('review-text').value = ''; setRate(0);
-    }
-
-    function loadReviews(appId, ownerUid) {
-        db.ref(`reviews/${appId}`).on('value', snap => {
-            const list = document.getElementById('reviews-list'); list.innerHTML = '';
-            snap.forEach(r => {
-                const d = r.val();
-                let replyHtml = '';
-                if(d.reply) replyHtml = `<div class="reply-box"><b>Developer Response:</b><br>${d.reply}</div>`;
-                else if(currentUser && currentUser.uid === ownerUid) {
-                    replyHtml = `<div style="margin-top:5px;"><input type="text" id="rep-${r.key}" placeholder="Reply..." style="font-size:12px;padding:4px;width:70%"><button onclick="submitReply('${appId}','${r.key}')" class="btn btn-primary" style="padding:4px 8px;font-size:10px;margin-left:5px">Reply</button></div>`;
-                }
-                list.innerHTML += `<div class="review-card"><div class="review-header"><b>${d.userName}</b><span>${new Date(d.timestamp).toLocaleDateString()}</span></div><div style="color:#FFC107;font-size:12px;">${'★'.repeat(d.rating)}</div><div style="font-size:13px;margin-top:4px;">${d.comment}</div>${replyHtml}</div>`;
+        db.ref('notifications/' + currentUser.uid).on('value', (snap) => {
+            const notifications = [];
+            snap.forEach(child => {
+                notifications.push({ id: child.key, ...child.val() });
             });
+            
+            notifications.reverse();
+            
+            const unreadCount = notifications.filter(n => !n.read).length;
+            const countBadge = document.getElementById('notificationCount');
+            if(unreadCount > 0) {
+                countBadge.style.display = 'inline-block';
+                countBadge.innerText = unreadCount;
+            } else {
+                countBadge.style.display = 'none';
+            }
+            
+            window.notifications = notifications;
         });
     }
-
-    window.submitReply = (appId, reviewId) => { const text = document.getElementById(`rep-${reviewId}`).value; if(text) db.ref(`reviews/${appId}/${reviewId}/reply`).set(text); }
-    window.tryInstall = () => { if(!currentUser) return document.getElementById('auth-overlay').classList.add('open'); const app = allApps.find(a => a.key === currentAppId); document.getElementById('modal-icon').src = app.icon; document.getElementById('modal-title').innerText = app.name; document.getElementById('install-modal').classList.add('show'); }
-    window.confirmInstall = () => { document.getElementById('install-modal').classList.remove('show'); const btn = document.getElementById('btn-install'); btn.innerText = "Installing..."; btn.disabled = true; db.ref('apps/' + currentAppId + '/downloads').transaction(current => (current || 0) + 1); setTimeout(() => { db.ref(`installs/${currentUser.uid}/${currentAppId}`).set({installed:true, ts: Date.now()}).then(() => { btn.innerText = "Open"; btn.className = "btn btn-outline"; btn.disabled = false; btn.onclick = () => window.location.href = currentAppUrl; }); }, 2000); }
-
-    window.doLogin = () => auth.signInWithEmailAndPassword(document.getElementById('auth-email').value, document.getElementById('auth-pass').value).then(()=>document.getElementById('auth-overlay').classList.remove('open')).catch(e=>document.getElementById('auth-msg').innerText=e.message);
-    window.doSignup = () => auth.createUserWithEmailAndPassword(document.getElementById('auth-email').value, document.getElementById('auth-pass').value).then(c=>{db.ref('users/'+c.user.uid).set({email:c.user.email}); document.getElementById('auth-overlay').classList.remove('open');}).catch(e=>document.getElementById('auth-msg').innerText=e.message);
-    window.resetPassword = () => { const email = document.getElementById('auth-email').value; if(!email) return alert("Enter email first"); auth.sendPasswordResetEmail(email).then(() => alert("Reset link sent!")).catch(e => alert(e.message)); }
-    window.handleProfileClick = () => { if(!currentUser) document.getElementById('auth-overlay').classList.add('open'); else { document.getElementById('prof-name').value=currentUser.displayName||''; document.getElementById('prof-img').src=currentUser.photoURL||`https://ui-avatars.com/api/?name=${currentUser.email}`; document.getElementById('page-profile').classList.add('open'); } }
-    window.closeAuth = () => document.getElementById('auth-overlay').classList.remove('open'); window.closePage = (id) => document.getElementById(id).classList.remove('open');
-
-    function loadDevContent() {
-        const div = document.getElementById('dev-content');
-        db.ref('developers/'+currentUser.uid).on('value', s => {
-            const d = s.val() || {};
-            if(!d.paymentStatus) { div.innerHTML = `<div style="text-align:center;padding:20px;"><span class="material-icons-round" style="font-size:48px;color:var(--primary)">verified</span><h2>Become a Developer</h2><p>Step 1/2: Pay ₹10 Lifetime Fee</p><a href="https://www.upi.me/pay?pa=rikitaupi@ybl&am=10&tn=Lifetime access Creation Lifetime paid For Devloper" class="btn btn-primary">Pay ₹10 UPI</a><div style="margin-top:20px;text-align:left;"><input type="text" id="pay-utr" placeholder="Transaction ID (UTR)" style="margin-bottom:10px;"><button class="btn btn-outline" onclick="document.getElementById('file-pay').click()">Upload Screenshot</button><input type="file" id="file-pay" hidden onchange="previewSingleImg(this,'prev-pay')"><img id="prev-pay" class="preview-img" style="display:none;margin-bottom:10px;"><button class="btn btn-primary" style="width:100%;margin-top:10px;" onclick="submitPay()">Submit Payment</button></div></div>`; return; }
-            if(d.paymentStatus === 'pending') { div.innerHTML = `<div style="text-align:center;padding:40px;"><span class="material-icons-round" style="font-size:48px;color:orange">pending</span><h3>Payment Under Review</h3></div>`; return; }
-            if(d.paymentStatus === 'approved' && !d.kycStatus) { div.innerHTML = `<div style="padding:16px;"><h2>Developer Verification</h2><p>Step 2/2: Submit your details.</p><div class="legal-box"><b>LEGAL:</b> Identity verification for app publishers.</div><div class="input-group"><label>Account Type</label><select id="kyc-type"><option value="Personal">Personal</option><option value="Organization">Organization</option></select></div><div class="input-group"><label>Console Name</label><input type="text" id="kyc-devname"></div><div class="input-group"><label>Full Name</label><input type="text" id="kyc-name"></div><div class="input-group"><label>Website (Optional)</label><input type="url" id="kyc-web" placeholder="https://"></div><div class="input-group"><label>Address</label><textarea id="kyc-addr"></textarea></div><div class="input-group"><label>Mobile</label><input type="number" id="kyc-mobile"></div><div class="input-group"><label>Aadhar</label><input type="text" id="kyc-aadhar"></div><div class="input-group"><label>PAN</label><input type="text" id="kyc-pan"></div><button class="btn btn-primary" style="width:100%" onclick="submitKYC()">Submit Verification</button></div>`; return; }
-            if(d.kycStatus === 'pending') { div.innerHTML = `<div style="text-align:center;padding:40px;"><span class="material-icons-round" style="font-size:48px;color:orange">admin_panel_settings</span><h3>Verification In Progress</h3></div>`; return; }
-            if(d.lifetimePaid && d.kycStatus === 'approved') {
-                let totalDownloads = 0; let totalWithdrawn = d.paidOut || 0;
-                db.ref('apps').orderByChild('ownerUid').equalTo(currentUser.uid).once('value', appsSnap => {
-                    let myAppsHtml = '';
-                    appsSnap.forEach(appSnap => {
-                        const app = appSnap.val(); totalDownloads += (app.downloads || 0);
-                        myAppsHtml += `<div class="app-list-item" style="border-left:3px solid ${app.status==='published'?'green':'orange'}"><img src="${app.icon}" class="app-icon"><div class="app-info"><b>${app.name}</b><div>${app.status} • ${app.downloads||0} DLs</div></div><button class="edit-btn" onclick="editApp('${appSnap.key}')">Edit</button></div>`;
-                    });
-                    let totalEarnings = totalDownloads * RATE_PER_DOWNLOAD; currentBalance = totalEarnings - totalWithdrawn; if(currentBalance < 0) currentBalance = 0;
-                    div.innerHTML = `<div class="wallet-card"><div>Wallet Balance</div><div class="wallet-balance">₹${currentBalance.toFixed(2)}</div><div style="font-size:12px">Total Earnings: ₹${totalEarnings.toFixed(2)}</div><button class="btn" style="background:rgba(255,255,255,0.2); color:white; margin-top:10px; width:100%" onclick="openWithdraw()">Withdraw Funds</button></div><button class="btn btn-primary" style="width:100%; margin-bottom:20px" onclick="openCreateApp()">+ Create App</button><h4>Withdrawal History</h4><div id="wd-history"></div><h4 style="margin-top:24px;">My Apps</h4>${myAppsHtml}`;
-                    db.ref('withdrawals').orderByChild('uid').equalTo(currentUser.uid).on('value', wdSnap => { const hDiv = document.getElementById('wd-history'); if(hDiv) { hDiv.innerHTML = ''; if(!wdSnap.exists()) hDiv.innerHTML = '<small>No history found</small>'; wdSnap.forEach(w => { const wd = w.val(); hDiv.innerHTML += `<div class="history-item"><div><b>₹${wd.amount}</b> via ${wd.method}</div><div class="status-${wd.status}">${wd.status.toUpperCase()}</div></div>`; }); } });
+    
+    window.openNotifications = () => {
+        if(!currentUser) {
+            document.getElementById('auth-overlay').style.transform = 'translateY(0)';
+            return;
+        }
+        
+        const container = document.getElementById('notifications-list');
+        if(!window.notifications || window.notifications.length === 0) {
+            container.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-secondary);">No notifications yet</div>';
+        } else {
+            container.innerHTML = window.notifications.map(n => `
+                <div class="notification-item ${!n.read ? 'notification-unread' : ''}" onclick="markNotificationRead('${n.id}')">
+                    <div class="notification-subject">${escapeHtml(n.subject || 'Notification')}</div>
+                    <div class="notification-message">${escapeHtml(n.message?.substring(0, 100) || '')}${n.message?.length > 100 ? '...' : ''}</div>
+                    <div class="notification-date">${new Date(n.createdAt).toLocaleString()}</div>
+                </div>
+            `).join('');
+        }
+        
+        document.getElementById('notification-modal').classList.add('show');
+    };
+    
+    window.closeNotifications = () => {
+        document.getElementById('notification-modal').classList.remove('show');
+    };
+    
+    window.markNotificationRead = async (notifId) => {
+        if(currentUser) {
+            await db.ref('notifications/' + currentUser.uid + '/' + notifId).update({ read: true });
+        }
+    };
+    
+    // ==================== AUTHENTICATION ====================
+    window.doLogin = () => {
+        const email = document.getElementById('auth-email').value;
+        const pass = document.getElementById('auth-pass').value;
+        auth.signInWithEmailAndPassword(email, pass)
+            .then(() => {
+                document.getElementById('auth-overlay').style.transform = 'translateY(100%)';
+                document.getElementById('auth-msg').innerText = '';
+            })
+            .catch(err => {
+                document.getElementById('auth-msg').innerText = err.message;
+            });
+    };
+    
+    window.doSignup = () => {
+        const email = document.getElementById('auth-email').value;
+        const pass = document.getElementById('auth-pass').value;
+        auth.createUserWithEmailAndPassword(email, pass)
+            .then((userCred) => {
+                db.ref('users/' + userCred.user.uid).set({ email: email, createdAt: Date.now(), country: userCountry });
+                document.getElementById('auth-overlay').style.transform = 'translateY(100%)';
+                document.getElementById('auth-msg').innerText = '';
+            })
+            .catch(err => {
+                document.getElementById('auth-msg').innerText = err.message;
+            });
+    };
+    
+    window.closeAuth = () => {
+        document.getElementById('auth-overlay').style.transform = 'translateY(100%)';
+    };
+    
+    window.handleProfileClick = () => {
+        if(!currentUser) {
+            document.getElementById('auth-overlay').style.transform = 'translateY(0)';
+        } else {
+            document.getElementById('prof-name').value = currentUser.displayName || '';
+            document.getElementById('prof-img').src = currentUser.photoURL || `https://ui-avatars.com/api/?name=${currentUser.email}&background=00875F&color=fff`;
+            document.getElementById('page-profile').classList.add('open');
+        }
+    };
+    
+    window.closePage = (pageId) => {
+        document.getElementById(pageId).classList.remove('open');
+    };
+    
+    window.logout = () => {
+        auth.signOut();
+        closePage('page-profile');
+    };
+    
+    window.toggleDark = () => {
+        document.body.classList.toggle('dark-mode');
+        localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+    };
+    
+    window.downloadAppStore = () => {
+        window.open('https://github.com/NitaiStudio/RikiAppStore/releases/download/RikiAppstore/RikiApp.store.apk', '_blank');
+    };
+    
+    window.bottomNavTo = (tab) => {
+        document.querySelectorAll('.bottom-nav-item').forEach(el => el.classList.remove('active'));
+        if(tab === 'home') {
+            document.querySelectorAll('.bottom-nav-item')[0].classList.add('active');
+            document.getElementById('view-home').classList.remove('hidden');
+            document.getElementById('view-dev').classList.add('hidden');
+        } else {
+            if(!currentUser) {
+                document.getElementById('auth-overlay').style.transform = 'translateY(0)';
+                return;
+            }
+            document.querySelectorAll('.bottom-nav-item')[1].classList.add('active');
+            document.getElementById('view-home').classList.add('hidden');
+            document.getElementById('view-dev').classList.remove('hidden');
+            loadDevContent();
+        }
+    };
+    
+    // ==================== APP DETAIL & INSTALL ====================
+    window.openDetail = async (appId) => {
+        currentAppId = appId;
+        const app = allApps.find(a => a.key === appId);
+        if(!app) return;
+        currentAppData = app;
+        
+        document.getElementById('det-title').innerText = app.name;
+        document.getElementById('det-icon').src = app.icon || 'https://via.placeholder.com/80';
+        document.getElementById('det-cat').innerText = app.category || 'App';
+        document.getElementById('det-desc').innerText = app.description || 'No description available';
+        document.getElementById('det-dev-name').innerText = app.devName || 'RikiApp Store';
+        document.getElementById('det-dev-email').innerText = app.devEmail || SUPPORT_EMAIL;
+        document.getElementById('det-dev-website').innerText = app.devWebsite || 'Not provided';
+        document.getElementById('det-downloads').innerText = app.downloads || 0;
+        document.getElementById('det-rating').innerText = (app.avgRating || 4.0).toFixed(1);
+        
+        const screensContainer = document.getElementById('det-screens');
+        screensContainer.innerHTML = '';
+        if(app.screenshots && app.screenshots.length) {
+            app.screenshots.forEach(ss => {
+                screensContainer.innerHTML += `<img src="${ss}" alt="screenshot">`;
+            });
+        }
+        
+        document.getElementById('page-detail').classList.add('open');
+        loadReviews(appId);
+    };
+    
+    window.tryInstall = () => {
+        if(!currentAppData) return;
+        document.getElementById('modal-icon').src = currentAppData.icon || 'https://via.placeholder.com/48';
+        document.getElementById('modal-title').innerText = currentAppData.name;
+        document.getElementById('modal-version').innerText = currentAppData.version || '1.0';
+        document.getElementById('install-modal').classList.add('show');
+    };
+    
+    window.closeInstallDialog = () => {
+        document.getElementById('install-modal').classList.remove('show');
+    };
+    
+    window.confirmInstall = () => {
+        closeInstallDialog();
+        
+        if(currentAppId) {
+            db.ref('apps/' + currentAppId + '/downloads').transaction(current => (current || 0) + 1);
+            if(currentUser) {
+                db.ref(`installs/${currentUser.uid}/${currentAppId}`).set({
+                    installedAt: Date.now(),
+                    appName: currentAppData.name
                 });
             }
+        }
+        
+        if(currentAppData && currentAppData.apkUrl) {
+            window.open(currentAppData.apkUrl, '_blank');
+        } else {
+            alert('APK URL not available.');
+        }
+    };
+    
+    // ==================== REVIEW SYSTEM ====================
+    window.setRate = (rating) => {
+        currentRating = rating;
+        const stars = document.querySelectorAll('#star-input-container i');
+        stars.forEach((star, index) => {
+            if(index < rating) {
+                star.innerText = 'star';
+                star.classList.add('active');
+            } else {
+                star.innerText = 'star_outline';
+                star.classList.remove('active');
+            }
+        });
+    };
+    
+    window.submitReview = async () => {
+        if(!currentUser) {
+            alert('Please login to review');
+            document.getElementById('auth-overlay').style.transform = 'translateY(0)';
+            return;
+        }
+        
+        if(!currentRating || currentRating === 0) {
+            alert('Please select a rating');
+            return;
+        }
+        
+        const comment = document.getElementById('review-text').value;
+        if(!comment.trim()) {
+            alert('Please write a review');
+            return;
+        }
+        
+        const review = {
+            userId: currentUser.uid,
+            userName: currentUser.displayName || currentUser.email,
+            userPhoto: currentUser.photoURL,
+            rating: currentRating,
+            comment: comment,
+            timestamp: Date.now()
+        };
+        
+        await db.ref(`reviews/${currentAppId}`).push(review);
+        alert('Review posted!');
+        document.getElementById('review-text').value = '';
+        setRate(0);
+        loadReviews(currentAppId);
+    };
+    
+    function loadReviews(appId) {
+        db.ref(`reviews/${appId}`).on('value', (snap) => {
+            const container = document.getElementById('reviews-list');
+            if(!container) return;
+            
+            const reviews = [];
+            snap.forEach(child => {
+                reviews.push({ id: child.key, ...child.val() });
+            });
+            
+            reviews.reverse();
+            
+            if(reviews.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-secondary); text-align: center;">No reviews yet. Be the first!</p>';
+                return;
+            }
+            
+            container.innerHTML = reviews.map(r => `
+                <div class="review-card">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
+                        <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; color: white;">
+                            ${r.userName ? r.userName.charAt(0).toUpperCase() : 'U'}
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; font-size: 14px;">${escapeHtml(r.userName || 'User')}</div>
+                            <div style="font-size: 11px; color: var(--text-tertiary);">${new Date(r.timestamp).toLocaleDateString()}</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 2px; margin-bottom: 8px;">
+                        ${Array(5).fill().map((_, i) => `<span class="material-icons-round" style="font-size: 16px; color: ${i < r.rating ? '#fbbf24' : '#cbd5e1'}">star</span>`).join('')}
+                    </div>
+                    <p style="font-size: 14px; line-height: 1.5;">${escapeHtml(r.comment)}</p>
+                </div>
+            `).join('');
         });
     }
-
-    window.openCreateApp = () => { document.getElementById('create-title').innerText = "Create App"; document.getElementById('edit-app-id').value = ""; document.querySelectorAll('#page-create input, #page-create textarea').forEach(i => i.value = ""); document.getElementById('prev-icon').style.display='none'; document.getElementById('screens-preview').innerHTML = ''; document.getElementById('page-create').classList.add('open'); }
-    window.editApp = (appId) => { document.getElementById('create-title').innerText = "Edit App (Update)"; document.getElementById('edit-app-id').value = appId; db.ref('apps/'+appId).once('value', s => { const a = s.val(); document.getElementById('new-name').value = a.name; document.getElementById('new-type').value = a.type; updateCategories(); document.getElementById('new-cat').value = a.category; document.getElementById('new-desc').value = a.description; document.getElementById('new-ver').value = a.version; document.getElementById('new-policy').value = a.privacyPolicy; document.getElementById('new-url').value = a.downloadUrl; document.getElementById('prev-icon').src = a.icon; document.getElementById('prev-icon').style.display = 'block'; document.getElementById('page-create').classList.add('open'); }); }
-    window.openWithdraw = () => { document.getElementById('withdraw-balance').innerText = `₹${currentBalance.toFixed(2)}`; document.getElementById('page-withdraw').classList.add('open'); }
-    window.submitWithdrawal = async () => { const amt = parseFloat(document.getElementById('wd-amount').value); const method = document.getElementById('wd-method').value; const det = document.getElementById('wd-details').value; if(!amt || amt < 10) return alert("Min withdrawal ₹10"); if(amt > currentBalance) return alert("Insufficient Balance"); if(!det) return alert("Enter Payment Details"); await db.ref('withdrawals').push({ uid: currentUser.uid, amount: amt, method: method, details: det, status: 'pending', timestamp: Date.now() }); alert("Request Submitted"); closePage('page-withdraw'); }
-    window.previewSingleImg = (input, id) => { const r=new FileReader(); r.onload=e=>{const i=document.getElementById(id); i.src=e.target.result; i.style.display='block'}; r.readAsDataURL(input.files[0]); }
-    window.previewMultiImgs = (input) => { const c=document.getElementById('screens-preview'); c.innerHTML=''; for(let i=0;i<Math.min(input.files.length,8);i++){ const r=new FileReader(); r.onload=e=>{const img=document.createElement('img'); img.src=e.target.result; c.appendChild(img)}; r.readAsDataURL(input.files[i]); } }
-    async function upload(file) { const fd=new FormData(); fd.append("image", file); try{const r=await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {method:'POST',body:fd}); const j=await r.json(); return j.data.url;}catch(e){return null;} }
     
-    window.saveProfile = async () => { document.getElementById('page-profile').style.opacity='0.5'; let url=currentUser.photoURL; const f=document.getElementById('file-prof').files[0]; if(f) url=await upload(f); await currentUser.updateProfile({displayName:document.getElementById('prof-name').value, photoURL:url}); await db.ref('users/'+currentUser.uid).update({ website: document.getElementById('prof-web').value }); document.getElementById('page-profile').style.opacity='1'; closePage('page-profile'); }
-    window.submitPay = async () => { const utr=document.getElementById('pay-utr').value; const f=document.getElementById('file-pay').files[0]; if(!utr||!f)return alert("Missing info"); const url=await upload(f); db.ref('paymentRequests').push({uid:currentUser.uid, txnId:utr, screenshot:url, status:'pending'}); db.ref('developers/'+currentUser.uid).update({paymentStatus:'pending'}); alert("Payment Submitted"); }
-    window.submitKYC = async () => { const data = { accType: document.getElementById('kyc-type').value, consoleName: document.getElementById('kyc-devname').value, legalName: document.getElementById('kyc-name').value, website: document.getElementById('kyc-web').value, address: document.getElementById('kyc-addr').value, mobile: document.getElementById('kyc-mobile').value, aadhar: document.getElementById('kyc-aadhar').value, pan: document.getElementById('kyc-pan').value, uid: currentUser.uid, email: currentUser.email }; if(!data.consoleName || !data.aadhar || !data.pan) return alert("Fill all fields"); await db.ref('kycData/'+currentUser.uid).set(data); await db.ref('developers/'+currentUser.uid).update({kycStatus: 'pending'}); alert("Verification Submitted!"); }
-
-    window.submitApp = async () => {
-        const editId = document.getElementById('edit-app-id').value;
-        const name = document.getElementById('new-name').value;
-        const url = document.getElementById('new-url').value;
-        const iconFile = document.getElementById('file-icon').files[0];
-        const screenFiles = document.getElementById('file-screens').files;
-        if(!name||!url) return alert("Fill required fields");
-        if(!editId && (!iconFile || screenFiles.length < 2)) return alert("Icon and 2 screenshots required for new app");
-        document.getElementById('create-loader').style.display='block';
+    // ==================== UPLOAD METHOD TOGGLE ====================
+    function toggleUploadMethod() {
+        const method = document.querySelector('input[name="upload-type"]:checked').value;
+        const apkSection = document.getElementById('apk-upload-section');
+        const linkSection = document.getElementById('link-upload-section');
+        
+        if(method === 'apk') {
+            apkSection.style.display = 'block';
+            linkSection.style.display = 'none';
+        } else {
+            apkSection.style.display = 'none';
+            linkSection.style.display = 'block';
+        }
+    }
+    
+    // ==================== APK UPLOAD ====================
+    async function uploadToGofile(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        document.getElementById('apk-uploading').style.display = 'block';
+        document.getElementById('apk-error').style.display = 'none';
+        document.getElementById('apk-success').style.display = 'none';
+        
         try {
-            let iUrl = null, sUrls = null;
-            if(iconFile) iUrl = await upload(iconFile);
-            if(screenFiles.length > 0) { const uploadPromises = Array.from(screenFiles).map(file => upload(file)); sUrls = await Promise.all(uploadPromises); }
-            const userSnap = await db.ref('users/'+currentUser.uid).once('value'); const userData = userSnap.val() || {};
-            const devSnap = await db.ref('kycData/'+currentUser.uid).once('value'); const devData = devSnap.val() || {};
-            const website = userData.website || devData.website || "";
-            const appData = { name: name, type: document.getElementById('new-type').value, category: document.getElementById('new-cat').value, privacyPolicy: document.getElementById('new-policy').value, description: document.getElementById('new-desc').value, version: document.getElementById('new-ver').value, downloadUrl: url, status: 'pending', ownerUid: currentUser.uid, devName: devData.consoleName||"Unknown", devEmail: currentUser.email, devAddr: devData.address||"Hidden", devWebsite: website };
-            if(iUrl) appData.icon = iUrl; if(sUrls) appData.screenshots = sUrls;
-            if(editId) await db.ref('apps/'+editId).update(appData); else { appData.downloads = 0; await db.ref('apps').push(appData); }
-            document.getElementById('create-loader').style.display='none'; closePage('page-create'); alert("Submitted for review");
-        } catch(e) { document.getElementById('create-loader').style.display='none'; alert("Upload failed"); }
+            const serverRes = await fetch('https://api.gofile.io/servers');
+            const serverData = await serverRes.json();
+            
+            if(!serverData.data?.servers?.length) throw new Error('No server available');
+            
+            const server = serverData.data.servers[0].name;
+            const uploadUrl = `https://${server}.gofile.io/uploadFile`;
+            
+            const uploadRes = await fetch(uploadUrl, {
+                method: 'POST',
+                body: formData,
+                headers: { 'Authorization': `Bearer ${GOFILE_TOKEN}` }
+            });
+            
+            const result = await uploadRes.json();
+            document.getElementById('apk-uploading').style.display = 'none';
+            
+            if(result.status === 'ok' && result.data?.downloadPage) {
+                document.getElementById('apk-url').value = result.data.downloadPage;
+                document.getElementById('apk-success').style.display = 'block';
+                return result.data.downloadPage;
+            } else {
+                throw new Error(result.status || 'Upload failed');
+            }
+        } catch(error) {
+            document.getElementById('apk-uploading').style.display = 'none';
+            document.getElementById('apk-error').style.display = 'block';
+            document.getElementById('apk-error').innerText = '❌ Upload failed: ' + error.message;
+            return null;
+        }
+    }
+    
+    window.validateAndUploadAPK = async (input) => {
+        const file = input.files[0];
+        if(!file) return;
+        
+        if(!file.name.toLowerCase().endsWith('.apk')) {
+            document.getElementById('apk-error').style.display = 'block';
+            document.getElementById('apk-error').innerText = '❌ Only .apk files are allowed!';
+            document.getElementById('apk-success').style.display = 'none';
+            input.value = '';
+            return;
+        }
+        
+        document.getElementById('apk-error').style.display = 'none';
+        await uploadToGofile(file);
+    };
+    
+    // ==================== IMAGE UPLOAD ====================
+    async function uploadToImgBB(file) {
+        const formData = new FormData();
+        formData.append('image', file);
+        
+        try {
+            const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            if(data.success) return data.data.url;
+            throw new Error('Upload failed');
+        } catch(error) {
+            console.error('Upload error:', error);
+            return null;
+        }
+    }
+    
+    window.previewIcon = (input) => {
+        const file = input.files[0];
+        if(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const preview = document.getElementById('icon-preview');
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+    
+    window.previewScreens = (input) => {
+        const container = document.getElementById('screens-preview');
+        container.innerHTML = '';
+        Array.from(input.files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                container.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+        });
+    };
+    
+    // ==================== SUBMIT APP (with APK or Direct Link) ====================
+    window.submitApp = async () => {
+        if(!currentUser) {
+            alert('Please login to submit an app');
+            document.getElementById('auth-overlay').style.transform = 'translateY(0)';
+            return;
+        }
+        
+        const name = document.getElementById('new-name').value;
+        const category = document.getElementById('new-cat').value;
+        const shortDesc = document.getElementById('new-short-desc').value;
+        const description = document.getElementById('new-desc').value;
+        const version = document.getElementById('new-ver').value;
+        const privacyPolicy = document.getElementById('new-policy').value;
+        const devWebsite = document.getElementById('new-website').value;
+        const iconFile = document.getElementById('file-icon').files[0];
+        const screenshotFiles = document.getElementById('file-screens').files;
+        const uploadMethod = document.querySelector('input[name="upload-type"]:checked').value;
+        
+        if(!name) { alert('Enter app name'); return; }
+        if(!description) { alert('Enter description'); return; }
+        if(!privacyPolicy) { 
+            document.getElementById('policy-error').style.display = 'block';
+            return;
+        }
+        document.getElementById('policy-error').style.display = 'none';
+        
+        if(!iconFile) { alert('Please upload app icon'); return; }
+        if(screenshotFiles.length < 2) { alert('Please upload at least 2 screenshots'); return; }
+        
+        let downloadUrl = null;
+        
+        if(uploadMethod === 'apk') {
+            const apkFile = document.getElementById('apk-file').files[0];
+            if(!apkFile) { alert('Please upload APK file'); return; }
+            if(!apkFile.name.toLowerCase().endsWith('.apk')) {
+                document.getElementById('apk-error').style.display = 'block';
+                return;
+            }
+            document.getElementById('apk-error').style.display = 'none';
+            document.getElementById('create-loader').style.display = 'block';
+            downloadUrl = await uploadToGofile(apkFile);
+            if(!downloadUrl) {
+                document.getElementById('create-loader').style.display = 'none';
+                alert('APK upload failed');
+                return;
+            }
+        } else {
+            downloadUrl = document.getElementById('direct-link').value;
+            if(!downloadUrl) { alert('Please enter download URL'); return; }
+            if(!downloadUrl.startsWith('http')) { alert('Please enter valid URL starting with http:// or https://'); return; }
+        }
+        
+        document.getElementById('create-loader').style.display = 'block';
+        
+        try {
+            const iconUrl = await uploadToImgBB(iconFile);
+            if(!iconUrl) throw new Error('Icon upload failed');
+            
+            const screenshotUrls = [];
+            for(let file of screenshotFiles) {
+                const url = await uploadToImgBB(file);
+                if(url) screenshotUrls.push(url);
+            }
+            if(screenshotUrls.length < 2) throw new Error('Screenshot upload failed');
+            
+            const appData = {
+                name: name,
+                category: category,
+                shortDesc: shortDesc || description?.substring(0, 60) || '',
+                description: description,
+                version: version || '1.0',
+                privacyPolicy: privacyPolicy,
+                devWebsite: devWebsite || '',
+                apkUrl: downloadUrl,
+                icon: iconUrl,
+                screenshots: screenshotUrls,
+                ownerUid: currentUser.uid,
+                devName: currentUser.displayName || currentUser.email,
+                devEmail: currentUser.email,
+                status: 'pending',
+                downloads: 0,
+                submittedAt: Date.now(),
+                avgRating: 0
+            };
+            
+            await db.ref('apps').push(appData);
+            alert('App submitted for review! You will be notified once approved.');
+            closePage('page-create');
+            
+            document.getElementById('new-name').value = '';
+            document.getElementById('new-short-desc').value = '';
+            document.getElementById('new-desc').value = '';
+            document.getElementById('new-ver').value = '';
+            document.getElementById('new-policy').value = '';
+            document.getElementById('new-website').value = '';
+            document.getElementById('apk-url').value = '';
+            document.getElementById('direct-link').value = '';
+            document.getElementById('icon-preview').style.display = 'none';
+            document.getElementById('screens-preview').innerHTML = '';
+            document.getElementById('apk-success').style.display = 'none';
+            
+        } catch(error) {
+            alert('Error: ' + error.message);
+        } finally {
+            document.getElementById('create-loader').style.display = 'none';
+        }
+    };
+    
+    window.openCreateApp = () => {
+        if(!currentUser) {
+            alert('Please login to submit app');
+            document.getElementById('auth-overlay').style.transform = 'translateY(0)';
+            return;
+        }
+        document.getElementById('create-title').innerText = 'Submit New App';
+        document.getElementById('edit-app-id').value = '';
+        document.getElementById('page-create').classList.add('open');
+    };
+    
+    // ==================== DEVELOPER DASHBOARD ====================
+    function loadDevContent() {
+        const container = document.getElementById('dev-content');
+        if(!container) return;
+        
+        db.ref('developers/' + currentUser.uid).once('value', async (snap) => {
+            const devData = snap.val() || {};
+            
+            if(!devData.registered) {
+                await db.ref('developers/' + currentUser.uid).set({
+                    registered: true,
+                    registeredAt: Date.now(),
+                    uid: currentUser.uid,
+                    email: currentUser.email,
+                    status: 'active',
+                    country: userCountry
+                });
+            }
+            
+            let myAppsHtml = '';
+            let totalDownloads = 0;
+            
+            const appsSnap = await db.ref('apps').orderByChild('ownerUid').equalTo(currentUser.uid).once('value');
+            
+            appsSnap.forEach(child => {
+                const app = child.val();
+                totalDownloads += (app.downloads || 0);
+                myAppsHtml += `
+                    <div class="app-list-item" style="margin: 8px 0;">
+                        <img src="${app.icon || 'https://via.placeholder.com/48'}" class="app-icon" style="width: 48px; height: 48px;">
+                        <div class="app-info">
+                            <div class="app-name">${escapeHtml(app.name)}</div>
+                            <div class="app-meta">
+                                <span class="status-badge ${app.status === 'published' ? 'status-approved' : (app.status === 'pending' ? 'status-pending' : 'status-rejected')}">${app.status || 'pending'}</span>
+                                <span>📥 ${app.downloads || 0} downloads</span>
+                            </div>
+                        </div>
+                        <button class="edit-btn" onclick="editApp('${child.key}')" style="background: var(--primary); color: white; border: none; padding: 6px 16px; border-radius: 20px;">Edit</button>
+                    </div>
+                `;
+            });
+            
+            // Calculate earnings based on country
+            const earnings = calculateEarnings(totalDownloads);
+            currentBalance = earnings;
+            
+            if(userCountry === "IN") {
+                currentBalanceUSD = totalDownloads * EARNING_RATE_USD;
+            } else {
+                currentBalanceUSD = earnings;
+            }
+            
+            container.innerHTML = `
+                <div class="wallet-card">
+                    <div>Total Earnings</div>
+                    <div class="wallet-balance">${formatBalance(earnings)}</div>
+                    <div style="font-size: 13px;">Total Downloads: ${totalDownloads}</div>
+                    <div style="font-size: 11px; opacity: 0.8; margin-top: 5px;">Rate: 1000 downloads = ${userCountry === "IN" ? '₹1' : '$0.1 (USDT)'}</div>
+                    <button class="btn" style="background: rgba(255,255,255,0.2); color: white; margin-top: 16px; width: 100%;" onclick="openWithdraw()">Withdraw Funds</button>
+                </div>
+                
+                <button class="btn btn-primary" style="width: 100%; margin-bottom: 24px;" onclick="openCreateApp()">
+                    <span class="material-icons-round" style="vertical-align: middle;">add</span> Submit New App
+                </button>
+                
+                <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">My Apps</h3>
+                <div id="my-apps-list">${myAppsHtml || '<p style="color: var(--text-secondary);">No apps submitted yet.</p>'}</div>
+                
+                <div style="margin-top: 24px;">
+                    <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">Withdrawal History</h3>
+                    <div id="wd-history"></div>
+                </div>
+            `;
+            
+            loadWithdrawalHistory();
+        });
+    }
+    
+    function loadWithdrawalHistory() {
+        db.ref('withdrawals').orderByChild('uid').equalTo(currentUser.uid).on('value', (snap) => {
+            const container = document.getElementById('wd-history');
+            if(!container) return;
+            
+            const withdrawals = [];
+            snap.forEach(child => {
+                withdrawals.push({ id: child.key, ...child.val() });
+            });
+            
+            withdrawals.reverse();
+            
+            if(withdrawals.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-secondary);">No withdrawal requests yet.</p>';
+                return;
+            }
+            
+            container.innerHTML = withdrawals.map(w => `
+                <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border);">
+                    <div>
+                        <div style="font-weight: 600;">${w.currency === 'USD' ? '$' : '₹'}${w.amount}</div>
+                        <div style="font-size: 11px; color: var(--text-tertiary);">${w.method}</div>
+                    </div>
+                    <div>
+                        <span style="background: ${w.status === 'approved' ? '#10b981' : (w.status === 'pending' ? '#f59e0b' : '#ef4444')}; color: white; padding: 4px 10px; border-radius: 20px; font-size: 11px;">${w.status || 'pending'}</span>
+                    </div>
+                </div>
+            `).join('');
+        });
+    }
+    
+    window.editApp = async (appId) => {
+        const snap = await db.ref('apps/' + appId).once('value');
+        const app = snap.val();
+        if(!app) return;
+        
+        document.getElementById('create-title').innerText = 'Edit App';
+        document.getElementById('edit-app-id').value = appId;
+        document.getElementById('new-name').value = app.name || '';
+        document.getElementById('new-cat').value = app.category || 'Games';
+        document.getElementById('new-short-desc').value = app.shortDesc || '';
+        document.getElementById('new-desc').value = app.description || '';
+        document.getElementById('new-ver').value = app.version || '';
+        document.getElementById('new-policy').value = app.privacyPolicy || '';
+        document.getElementById('new-website').value = app.devWebsite || '';
+        document.getElementById('apk-url').value = app.apkUrl || '';
+        
+        // Set upload method based on existing data
+        if(app.apkUrl) {
+            if(app.apkUrl.includes('gofile') || app.apkUrl.endsWith('.apk')) {
+                document.querySelector('input[name="upload-type"][value="apk"]').checked = true;
+                toggleUploadMethod();
+            } else {
+                document.querySelector('input[name="upload-type"][value="link"]').checked = true;
+                toggleUploadMethod();
+                document.getElementById('direct-link').value = app.apkUrl;
+            }
+        }
+        
+        if(app.icon) {
+            document.getElementById('icon-preview').src = app.icon;
+            document.getElementById('icon-preview').style.display = 'block';
+        }
+        
+        document.getElementById('page-create').classList.add('open');
+    };
+    
+    window.openWithdraw = () => {
+        document.getElementById('withdraw-balance').innerText = userCountry === "IN" ? `₹${currentBalance.toFixed(2)}` : `$${currentBalance.toFixed(2)}`;
+        if(userCountry !== "IN") {
+            document.getElementById('usd-balance').innerHTML = `≈ ₹${(currentBalance * 85).toFixed(2)} INR`;
+        } else {
+            document.getElementById('usd-balance').innerHTML = `≈ $${(currentBalance / 85).toFixed(2)} USD`;
+        }
+        document.getElementById('page-withdraw').classList.add('open');
+    };
+    
+    window.submitWithdrawal = async () => {
+        if(!currentUser) return;
+        
+        let amount = parseFloat(document.getElementById('wd-amount').value);
+        const method = document.getElementById('wd-method').value;
+        const details = document.getElementById('wd-details').value;
+        
+        if(!amount || amount < (userCountry === "IN" ? 100 : 5)) {
+            alert(`Minimum withdrawal amount is ${userCountry === "IN" ? '₹100' : '$5'}`);
+            return;
+        }
+        
+        if(amount > currentBalance) {
+            alert('Insufficient balance');
+            return;
+        }
+        
+        if(!details) {
+            alert('Please enter payment details');
+            return;
+        }
+        
+        await db.ref('withdrawals').push({
+            uid: currentUser.uid,
+            amount: amount,
+            currency: userCountry === "IN" ? "INR" : "USD",
+            method: method,
+            details: details,
+            status: 'pending',
+            requestedAt: Date.now(),
+            userEmail: currentUser.email,
+            country: userCountry
+        });
+        
+        alert('Withdrawal request submitted!');
+        closePage('page-withdraw');
+    };
+    
+    // ==================== AUTH STATE LISTENER ====================
+    auth.onAuthStateChanged((user) => {
+        currentUser = user;
+        const avatar = document.getElementById('headerAvatar');
+        
+        if(user) {
+            avatar.innerHTML = '';
+            avatar.style.backgroundImage = `url(${user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=00875F&color=fff`})`;
+            avatar.style.backgroundSize = 'cover';
+            avatar.style.backgroundPosition = 'center';
+            loadNotifications();
+        } else {
+            avatar.innerHTML = '<span class="material-icons-round" style="color: var(--text-secondary);">person</span>';
+            avatar.style.backgroundImage = '';
+            document.getElementById('notificationCount').style.display = 'none';
+        }
+    });
+    
+    function escapeHtml(str) {
+        if(!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if(m === '&') return '&amp;';
+            if(m === '<') return '&lt;';
+            if(m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    // Drag and drop for APK
+    const uploadArea = document.getElementById('apk-upload-area');
+    if(uploadArea) {
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = 'var(--primary)';
+            uploadArea.style.background = 'var(--ripple)';
+        });
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.borderColor = 'var(--border)';
+            uploadArea.style.background = '';
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = 'var(--border)';
+            uploadArea.style.background = '';
+            const file = e.dataTransfer.files[0];
+            if(file && file.name.toLowerCase().endsWith('.apk')) {
+                const input = document.getElementById('apk-file');
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                input.files = dataTransfer.files;
+                validateAndUploadAPK(input);
+            } else {
+                alert('Please drop a valid .apk file');
+            }
+        });
     }
 </script>
 </body>
