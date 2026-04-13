@@ -1,5 +1,5 @@
-// শুধু এই নামটা v1 থেকে v2 করে দিন
-const CACHE_NAME = "rikiapp-v2"; 
+// শুধু এই নামটা v1 থেকে v3 করে দিন
+const CACHE_NAME = "rikiapp-v3"; 
 
 const urlsToCache = [
   "./",
